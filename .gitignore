@@ -1,0 +1,43 @@
+# Node / npm
+node_modules/
+*-debug.log*
+.eslintcache
+
+# Vite / electron-vite build output
+out/
+.vite/
+dist/
+dist-electron/
+
+# electron-builder release artifacts
+release/
+
+# TypeScript incremental
+*.tsbuildinfo
+
+# CMake / C++ (core/ subproject)
+core/build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+compile_commands.json
+
+# vcpkg
+vcpkg_installed/
+
+# IDE / OS
+.vs/
+.idea/
+*.user
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local env
+.env
+.env.local
+.env.*.local
+
+# Claude per-project state
+.claude/

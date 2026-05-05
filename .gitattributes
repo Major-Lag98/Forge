@@ -1,0 +1,16 @@
+# Default: auto-detect text, normalize to LF in the repo
+* text=auto eol=lf
+
+# Explicit binary types (electron-builder assets)
+*.png binary
+*.ico binary
+*.icns binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+
+# Windows scripts get CRLF on checkout
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
