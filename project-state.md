@@ -56,7 +56,7 @@ Scoping is half the battle on a side project. Out of scope:
 | "Launch" | C++ core spawns the game binary, reports exit code back to UI | Demonstrates process supervision in a sentence. |
 | Target platform | **macOS or Windows — pick one** for v0.1 | Cross-platform later if it's interesting; the listing doesn't ask. |
 | CI | **GitHub Actions**, one platform, builds + tests + uploads artifact on tag | Hits the "build pipelines" desired qualification cleanly. |
-| Tests | GoogleTest for C++ core, Vitest for UI, one Playwright E2E. **Test-first throughout** — red, green, refactor, with test and implementation in separate commits. | Hits "unit, functional, and automation tests." Test-first also makes the discipline visible in git history, which is a clearer portfolio signal than tests appended at the end. |
+| Tests | GoogleTest (C++ pure-function units), Vitest (TS unit/functional), one Playwright E2E in Phase 2. Test-driven mindset — write tests as you design the API, not after — but no strict separate-commits red/green discipline. Every feature merges with passing tests; refactors and pure wiring don't need new tests. | Hits "unit, functional, and automation tests." Avoids the friction of stub-only commits without giving up the substance — tests still exist for every behavioral unit. |
 
 ---
 
@@ -86,19 +86,19 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] Repo scaffolding: Electron + Vite + React + TypeScript (electron-vite + electron-builder, target Windows)
 - [x] CMake + vcpkg setup for the C++ core; "hello" binary builds (vcpkg as git submodule, manifest mode; CMakePresets pinned to VS 2026 + x64; `forge_core.exe` prints a JSON via nlohmann-json)
 - [x] **GoogleTest + Vitest wired into the build with one trivial passing test each** — test infra runs in CI before any real code lands (`npm test` runs both; CTest preset for the C++ side, Vitest for TS; ESLint ignores extended for `vcpkg/` and `core/build/`)
-- [ ] Electron `child_process` spawns the C++ core; one round-trip JSON message renderer ↔ main ↔ core (test-first: integration test for the round-trip drives the implementation)
+- [ ] Electron `child_process` spawns the C++ core; one round-trip JSON message renderer ↔ main ↔ core, exercised by an integration test
 - [ ] GitHub Actions: lint, format, build, **run tests** on the chosen target OS
 
-### Phase 1 — Core flow (≈1–2 weeks, test-first throughout)
+### Phase 1 — Core flow (≈1–2 weeks)
 - [ ] Stub login screen → fake session
 - [ ] Catalog page: render games from a static JSON manifest
-- [ ] C++ core: HTTP download + SHA-256 verification + zip extract (unit tests written first)
-- [ ] C++ core: spawn the installed binary, surface exit code to the UI (integration test first)
-- [ ] **Milestone: log in, install a sample game, launch it from the UI** ← demo-ready, with a test suite that already passes
+- [ ] C++ core: HTTP download + SHA-256 verification + zip extract, with gtest unit coverage
+- [ ] C++ core: spawn the installed binary, surface exit code to the UI, with an integration test
+- [ ] **Milestone: log in, install a sample game, launch it from the UI** ← demo-ready, with passing tests
 
 ### Phase 2 — Polish & ship (≈1 week)
 - [ ] One Playwright E2E test: launch app, install game, verify it runs
-- [ ] Fill in any test gaps surfaced during Phase 1 (test-first slips happen — patch them honestly)
+- [ ] Fill in any test gaps surfaced during Phase 1
 - [ ] CI publishes a release artifact on tagged commits
 - [ ] Demo GIF, architecture diagram (a real SVG, not ASCII)
 - [ ] README finalized
