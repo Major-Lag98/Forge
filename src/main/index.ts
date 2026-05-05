@@ -5,7 +5,9 @@ import icon from '../../resources/icon.png?asset'
 import { CoreBridge } from './core-bridge'
 
 const coreBridge = new CoreBridge()
-const corePath = resolve(process.cwd(), 'core/build/default/core/Debug/forge_core.exe')
+const corePath =
+  process.env.FORGE_CORE_PATH ??
+  resolve(process.cwd(), 'core/build/default/core/Debug/forge_core.exe')
 
 function createWindow(): void {
   // Create the browser window.

@@ -1,6 +1,10 @@
 out
 dist
 pnpm-lock.yaml
+package-lock.json
 LICENSE.md
 tsconfig.json
 tsconfig.*.json
+vcpkg/
+core/build/
+project-state.md

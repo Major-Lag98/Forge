@@ -9,16 +9,30 @@
       "architecture": { "value": "x64", "strategy": "set" },
       "binaryDir": "${sourceDir}/core/build/default",
       "toolchainFile": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    },
+    {
+      "name": "ninja",
+      "displayName": "CI / Ninja (vcpkg)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/core/build/ninja",
+      "toolchainFile": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     }
   ],
   "buildPresets": [
-    { "name": "default", "configurePreset": "default", "configuration": "Debug" }
+    { "name": "default", "configurePreset": "default", "configuration": "Debug" },
+    { "name": "ninja", "configurePreset": "ninja" }
   ],
   "testPresets": [
     {
       "name": "default",
       "configurePreset": "default",
       "configuration": "Debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "ninja",
+      "configurePreset": "ninja",
       "output": { "outputOnFailure": true }
     }
   ]

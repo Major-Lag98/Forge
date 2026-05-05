@@ -3,7 +3,9 @@ import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { CoreBridge } from './core-bridge'
 
-const corePath = resolve(process.cwd(), 'core/build/default/core/Debug/forge_core.exe')
+const corePath =
+  process.env.FORGE_CORE_PATH ??
+  resolve(process.cwd(), 'core/build/default/core/Debug/forge_core.exe')
 
 describe('CoreBridge integration', () => {
   let bridge: CoreBridge | null = null
