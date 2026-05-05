@@ -1,7 +1,7 @@
 # Forge — Project State
 
 **Last updated:** May 4, 2026
-**Status:** 🟢 Phase 0 — Electron scaffold + C++ core building, GoogleTest + Vitest wired up with one passing test each. IPC bridge and CI still pending.
+**Status:** 🟢 Phase 0 — IPC round-trip live (renderer ↔ main ↔ C++ core, ping/pong over line-delimited JSON, integration-tested). CI is the only Phase 0 item left.
 
 ---
 
@@ -86,7 +86,7 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] Repo scaffolding: Electron + Vite + React + TypeScript (electron-vite + electron-builder, target Windows)
 - [x] CMake + vcpkg setup for the C++ core; "hello" binary builds (vcpkg as git submodule, manifest mode; CMakePresets pinned to VS 2026 + x64; `forge_core.exe` prints a JSON via nlohmann-json)
 - [x] **GoogleTest + Vitest wired into the build with one trivial passing test each** — test infra runs in CI before any real code lands (`npm test` runs both; CTest preset for the C++ side, Vitest for TS; ESLint ignores extended for `vcpkg/` and `core/build/`)
-- [ ] Electron `child_process` spawns the C++ core; one round-trip JSON message renderer ↔ main ↔ core, exercised by an integration test
+- [x] Electron `child_process` spawns the C++ core; one round-trip JSON message renderer ↔ main ↔ core, exercised by an integration test (line-delimited JSON over stdin/stdout, `{"op":"ping"}` → `{"pong":true}`; `CoreBridge` class in main; `window.api.request` in renderer; gtest unit covers `dispatch`, vitest integration spawns the real binary)
 - [ ] GitHub Actions: lint, format, build, **run tests** on the chosen target OS
 
 ### Phase 1 — Core flow (≈1–2 weeks)

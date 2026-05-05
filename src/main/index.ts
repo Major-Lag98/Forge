@@ -1,7 +1,11 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { CoreBridge } from './core-bridge'
+
+const coreBridge = new CoreBridge()
+const corePath = resolve(process.cwd(), 'core/build/default/core/Debug/forge_core.exe')
 
 function createWindow(): void {
   // Create the browser window.
@@ -49,8 +53,8 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  coreBridge.init(corePath)
+  ipcMain.handle('forge:request', (_event, message) => coreBridge.request(message))
 
   createWindow()
 
@@ -64,8 +68,9 @@ app.whenReady().then(() => {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
   if (process.platform !== 'darwin') {
+    await coreBridge.dispose()
     app.quit()
   }
 })

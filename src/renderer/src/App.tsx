@@ -1,8 +1,18 @@
+import { useState } from 'react'
 import Versions from './components/Versions'
 import electronLogo from './assets/electron.svg'
 
 function App(): React.JSX.Element {
-  const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+  const [response, setResponse] = useState<string>('')
+
+  const ping = async (): Promise<void> => {
+    try {
+      const result = await window.api.request({ op: 'ping' })
+      setResponse(JSON.stringify(result))
+    } catch (e) {
+      setResponse(`error: ${e instanceof Error ? e.message : String(e)}`)
+    }
+  }
 
   return (
     <>
@@ -22,11 +32,16 @@ function App(): React.JSX.Element {
           </a>
         </div>
         <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
+          <a target="_blank" rel="noreferrer" onClick={ping}>
+            Ping core
           </a>
         </div>
       </div>
+      {response && (
+        <p className="tip">
+          core says: <code>{response}</code>
+        </p>
+      )}
       <Versions></Versions>
     </>
   )
