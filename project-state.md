@@ -1,7 +1,7 @@
 # Forge — Project State
 
 **Last updated:** May 4, 2026
-**Status:** 🟢 Phase 0 — Electron + Vite + React + TS scaffold landed; CMake/vcpkg, tests, IPC, and CI still pending.
+**Status:** 🟢 Phase 0 — Electron scaffold + C++ core (CMake + vcpkg + nlohmann-json) building; tests, IPC, and CI still pending.
 
 ---
 
@@ -84,7 +84,7 @@ Three short phases. Goal is a working demo, not a flagship project.
 
 ### Phase 0 — Bootstrap (≈1 weekend)
 - [x] Repo scaffolding: Electron + Vite + React + TypeScript (electron-vite + electron-builder, target Windows)
-- [ ] CMake + vcpkg setup for the C++ core; "hello" binary builds
+- [x] CMake + vcpkg setup for the C++ core; "hello" binary builds (vcpkg as git submodule, manifest mode; CMakePresets pinned to VS 2026 + x64; `forge_core.exe` prints a JSON via nlohmann-json)
 - [ ] **GoogleTest + Vitest wired into the build with one trivial passing test each** — test infra runs in CI before any real code lands
 - [ ] Electron `child_process` spawns the C++ core; one round-trip JSON message renderer ↔ main ↔ core (test-first: integration test for the round-trip drives the implementation)
 - [ ] GitHub Actions: lint, format, build, **run tests** on the chosen target OS

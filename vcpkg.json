@@ -1,0 +1,8 @@
+{
+  "name": "forge",
+  "version": "0.1.0",
+  "description": "Forge desktop game launcher — C++ core",
+  "dependencies": [
+    "nlohmann-json"
+  ]
+}
