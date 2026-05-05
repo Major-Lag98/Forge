@@ -1,7 +1,7 @@
 # Forge — Project State
 
 **Last updated:** May 4, 2026
-**Status:** 🟢 Phase 0 complete — scaffold, C++ core, GoogleTest + Vitest, IPC round-trip, and a GitHub Actions workflow all in. Pending first push to GitHub to validate CI on a real runner. Phase 1 is next.
+**Status:** 🟢 Phase 0 complete — scaffold, C++ core, GoogleTest + Vitest, IPC round-trip, and Windows CI all green on the first `windows-latest` run (2m 48s). UI/UX design pass next, before any Phase 1 implementation.
 
 ---
 
