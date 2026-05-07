@@ -44,4 +44,48 @@ Description: Same as the welcome view and any selected game view. This image rei
 Purpose: Game selection pattern reinforcement.
 Components: Catalog buttons, Play button, Game Title Banner, Game details banner.
 State / flow: This page is reached by having an installed game selected.
-Open questions / things I'm unsure of: 
+Open questions / things I'm unsure of:
+
+---
+
+## Design decisions (locked)
+
+These resolve the open questions in the per-screen sections above. Implementation should follow these decisions unless something concrete in Phase 1 forces a revisit.
+
+### Layout & navigation
+
+- Two-pane vertical split throughout. Login: 1/3 left + 2/3 right. Post-login: ~1/8 catalog rail (left) + ~7/8 main content (right).
+- The "F" logo top-left of the catalog rail doubles as the **home button** — clicking it returns the right pane to the Welcome state.
+- **Sign-out:** small icon-only button at the bottom of the catalog rail (door / exit-arrow style), with a "Sign out" hover tooltip. Returns to the login view; install state survives.
+
+### Colour palette
+
+- Dark grey / black base — "metal" feel.
+- Red as **accent only**: selection borders, focus rings, the "username" label, error text/icons.
+- Primary action buttons (Sign in, Install, Play) in a neutral tone — never red. Red on primaries reads as warning/destructive in UI conventions.
+
+### Component patterns
+
+- **Catalog rail tiles:** vertical stack. Icon-when-available, fallback to a numbered/text tile for games without an icon (the stub games). Selected tile shown via shaded fill + a ~2 px accent-coloured border. No pop-out animation.
+- **Install progress = button:** the primary action button itself fills with progress during installation, with the percentage as its label. One element, one place to look.
+- **Uninstall button:** smaller, sits below Play on installed games. First click transforms it inline to "Confirm uninstall?". Second click triggers the actual uninstall. No modal.
+- **Error UI:** stays in the right pane next to the primary action button. Persists per selected game (switching to a different game doesn't clear the error on the first). Cleared when the user retries.
+
+### State & persistence
+
+- App-level view state: `login | welcome | gameDetail`. Plus `currentUser` and `selectedGameId`.
+- Per-game state: `NotInstalled | Installing(progress) | Installed | Uninstalling | Error(message)`.
+- **Login state is NOT persisted.** Fresh sign-in every launch.
+- **Install state IS persisted** across launches: a small JSON file in `app.getPath('userData')` records `{gameId, version, installPath, sha256}` for each installed game. Loaded on startup before the catalog renders, so the launcher knows what's installed without re-scanning.
+- Sign-out returns to the login view; install state survives.
+
+### Deferred to Phase 2 polish
+
+- Animated welcome → catalog transition (~250–350 ms CSS transform).
+- Game-detail pane backdrop / screenshots — plain background for v0.1.
+- Catalog rail scrolling (only matters past 3 games).
+
+### Decided against
+
+- Idle tooltip on the login screen (one input + one button doesn't need explaining).
+- Pop-out animation on selected catalog tile (border + shading is enough).

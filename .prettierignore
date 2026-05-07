@@ -8,3 +8,4 @@ tsconfig.*.json
 vcpkg/
 core/build/
 project-state.md
+design/

@@ -1,7 +1,7 @@
 # Forge — Project State
 
-**Last updated:** May 4, 2026
-**Status:** 🟢 Phase 0 complete — scaffold, C++ core, GoogleTest + Vitest, IPC round-trip, and Windows CI all green on the first `windows-latest` run (2m 48s). UI/UX design pass next, before any Phase 1 implementation.
+**Last updated:** May 6, 2026
+**Status:** 🟢 Phase 0 complete + UI/UX design locked ([design/README.md](./design/README.md)). Ready to start Phase 1.
 
 ---
 
@@ -75,6 +75,8 @@ Scoping is half the battle on a side project. Out of scope:
                        │ extract/spawn  │    └────────────────┘
                        └────────────────┘
 ```
+
+See [`design/README.md`](./design/README.md) for the visual design — hand sketches of each screen plus locked decisions on layout, colour palette, component patterns, and persistence.
 
 ---
 
