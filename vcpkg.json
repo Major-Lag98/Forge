@@ -4,6 +4,10 @@
   "description": "Forge desktop game launcher — C++ core",
   "dependencies": [
     "nlohmann-json",
+    "cpr",
+    "libzip",
+    "picosha2",
+    "cpp-httplib",
     {
       "name": "gtest",
       "host": false
