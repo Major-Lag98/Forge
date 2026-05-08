@@ -7,6 +7,10 @@ const corePath =
   process.env.FORGE_CORE_PATH ??
   resolve(process.cwd(), 'core/build/default/core/Debug/forge_core.exe')
 
+const helperZeroPath =
+  process.env.FORGE_HELPER_ZERO_PATH ??
+  resolve(process.cwd(), 'core/build/default/core/tests/Debug/forge_helper_zero.exe')
+
 describe('CoreBridge integration', () => {
   let bridge: CoreBridge | null = null
 
@@ -25,5 +29,20 @@ describe('CoreBridge integration', () => {
     bridge.init(corePath)
     const response = await bridge.request({ op: 'ping' })
     expect(response).toEqual({ pong: true })
+  })
+
+  it('launches an executable through the IPC bridge and surfaces the exit code', async () => {
+    if (!existsSync(corePath)) {
+      throw new Error(`forge_core.exe not found at ${corePath}.`)
+    }
+    if (!existsSync(helperZeroPath)) {
+      throw new Error(
+        `forge_helper_zero.exe not found at ${helperZeroPath}. Build the test target via 'npm run test:cpp' first.`
+      )
+    }
+    bridge = new CoreBridge()
+    bridge.init(corePath)
+    const response = await bridge.request({ op: 'launch', executable: helperZeroPath })
+    expect(response).toEqual({ exit_code: 0 })
   })
 })

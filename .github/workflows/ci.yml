@@ -55,6 +55,7 @@ jobs:
       - name: Run JS tests
         env:
           FORGE_CORE_PATH: ${{ github.workspace }}\core\build\ninja\core\forge_core.exe
+          FORGE_HELPER_ZERO_PATH: ${{ github.workspace }}\core\build\ninja\core\tests\forge_helper_zero.exe
         run: npm run test:js
 
       - name: Build Electron bundle
