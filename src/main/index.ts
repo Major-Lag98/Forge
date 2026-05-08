@@ -3,6 +3,8 @@ import { join, resolve } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { CoreBridge } from './core-bridge'
+import manifest from './manifest.json'
+import type { Manifest } from '../shared/types'
 
 const coreBridge = new CoreBridge()
 const corePath =
@@ -57,6 +59,7 @@ app.whenReady().then(() => {
 
   coreBridge.init(corePath)
   ipcMain.handle('forge:request', (_event, message) => coreBridge.request(message))
+  ipcMain.handle('forge:catalog', () => manifest as Manifest)
 
   createWindow()
 

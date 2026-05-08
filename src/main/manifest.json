@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "games": [
+    {
+      "id": "forge-stub-success",
+      "name": "Forge Stub (Success)",
+      "version": "1.0.0",
+      "description": "Test stub that exits cleanly. Verifies the launcher's happy-path install and launch flow end-to-end.",
+      "platform": "windows-x64",
+      "url": "https://github.com/Major-Lag98/forge-catalog/releases/download/stubs-1.0.0/forge-stub-success-windows-x64.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 50000,
+      "executable": "forge-stub-success.exe"
+    },
+    {
+      "id": "forge-stub-crash",
+      "name": "Forge Stub (Crash)",
+      "version": "1.0.0",
+      "description": "Test stub that exits with code 1. Verifies the launcher's error-surfacing path.",
+      "platform": "windows-x64",
+      "url": "https://github.com/Major-Lag98/forge-catalog/releases/download/stubs-1.0.0/forge-stub-crash-windows-x64.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 50000,
+      "executable": "forge-stub-crash.exe"
+    },
+    {
+      "id": "mindustry",
+      "name": "Mindustry",
+      "version": "8.0",
+      "description": "Open-source factory and tower-defense game. Build supply chains, automate production, and defend your core.",
+      "platform": "windows-x64",
+      "url": "https://github.com/Major-Lag98/forge-catalog/releases/download/mindustry-8.0/mindustry-windows-x64.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size_bytes": 152000000,
+      "executable": "Mindustry.exe"
+    }
+  ]
+}
