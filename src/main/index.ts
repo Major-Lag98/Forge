@@ -4,7 +4,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { CoreBridge } from './core-bridge'
 import manifest from './manifest.json'
-import type { Manifest } from '../shared/types'
+import type { InstalledGame, Manifest } from '../shared/types'
+import { loadInstallRecords, saveInstallRecord } from './installs'
 
 const coreBridge = new CoreBridge()
 const corePath =
@@ -60,6 +61,52 @@ app.whenReady().then(() => {
   coreBridge.init(corePath)
   ipcMain.handle('forge:request', (_event, message) => coreBridge.request(message))
   ipcMain.handle('forge:catalog', () => manifest as Manifest)
+  ipcMain.handle('forge:installed_games', () => loadInstallRecords())
+
+  ipcMain.handle('forge:install', async (_event, gameId: string) => {
+    const game = (manifest as Manifest).games.find((g) => g.id === gameId)
+    if (!game) return { ok: false, error: `unknown game id: ${gameId}` } as const
+
+    const installDir = join(app.getPath('userData'), 'installs', gameId)
+    const response = (await coreBridge.request({
+      op: 'install',
+      url: game.url,
+      expected_sha256: game.sha256,
+      install_dir: installDir
+    })) as Record<string, unknown>
+
+    if (!response || response.installed !== true) {
+      const err = typeof response?.error === 'string' ? response.error : 'install failed'
+      return { ok: false, error: err } as const
+    }
+
+    const record: InstalledGame = {
+      id: game.id,
+      version: game.version,
+      install_dir: installDir,
+      executable_path: join(installDir, game.executable),
+      installed_at: new Date().toISOString()
+    }
+    await saveInstallRecord(record)
+    return { ok: true, record } as const
+  })
+
+  ipcMain.handle('forge:launch', async (_event, gameId: string) => {
+    const records = await loadInstallRecords()
+    const record = records.find((r) => r.id === gameId)
+    if (!record) return { ok: false, error: `not installed: ${gameId}` } as const
+
+    const response = (await coreBridge.request({
+      op: 'launch',
+      executable: record.executable_path
+    })) as Record<string, unknown>
+
+    if (response && typeof response.exit_code === 'number') {
+      return { ok: true, exit_code: response.exit_code } as const
+    }
+    const err = typeof response?.error === 'string' ? response.error : 'launch failed'
+    return { ok: false, error: err } as const
+  })
 
   createWindow()
 

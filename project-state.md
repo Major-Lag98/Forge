@@ -1,7 +1,7 @@
 # Forge — Project State
 
 **Last updated:** May 7, 2026
-**Status:** 🟢 Phase 1 in progress — login, catalog, and C++ install primitives (download / SHA-256 / zip extract) all green on CI. Launch primitive, install orchestrator (UI-wired), and stub binaries still pending before the demo milestone.
+**Status:** 🟢 Phase 1 in progress — login, catalog, install primitives (download / hash / extract), launch primitive, and the install → play UI flow all in. Progress percentage, uninstall, and stub binaries pending before the demo milestone.
 
 ---
 
@@ -96,7 +96,8 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] Catalog page: render games from a static JSON manifest
 - [x] C++ core: HTTP download + SHA-256 verification + zip extract, with gtest unit coverage
 - [ ] C++ core: spawn the installed binary, surface exit code to the UI, with an integration test
-- [ ] C++ core: install orchestrator (download + verify + extract) wired to IPC; Install button enabled with button-as-progress per design; install state persisted to a JSON file under `app.getPath('userData')` and reloaded on startup
+- [ ] (4.5a) C++ install orchestrator (download + verify + extract) wired to IPC; install state persisted to a JSON file under `app.getPath('userData')` and reloaded on startup; Install → Play button transition works (Install button shows "Installing…" text — real progress percentage deferred to 4.5b)
+- [ ] (4.5b) Design polish: protocol IDs + event messages so the IPC bridge supports streaming progress; button-as-progress with percentage during install; uninstall button under Play with two-click inline confirm
 - [ ] Build & host the stub binaries: tiny CMake sub-project for `forge-stub-success` and `forge-stub-crash`; mirror as zips to a `forge-catalog` GitHub release; fill real SHA-256 values in `manifest.json`
 - [ ] **Milestone: log in, install a sample game, launch it from the UI** ← demo-ready, with passing tests
 

@@ -9,6 +9,7 @@ add_library(forge_protocol STATIC
   src/hash.cpp
   src/archive.cpp
   src/launch.cpp
+  src/install.cpp
 )
 target_include_directories(forge_protocol PUBLIC src ${PICOSHA2_INCLUDE_DIRS})
 target_link_libraries(forge_protocol PUBLIC

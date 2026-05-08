@@ -14,3 +14,11 @@ export interface Manifest {
   schema_version: number
   games: Game[]
 }
+
+export interface InstalledGame {
+  id: string
+  version: string
+  install_dir: string
+  executable_path: string
+  installed_at: string
+}

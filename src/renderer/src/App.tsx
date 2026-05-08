@@ -5,7 +5,17 @@ import { WelcomeView } from './views/WelcomeView'
 import { GameDetailView } from './views/GameDetailView'
 import type { Game } from '../../shared/types'
 
-type Session = { currentUser: string; games: Game[] }
+export type GameInstallStatus =
+  | { kind: 'idle' }
+  | { kind: 'installing' }
+  | { kind: 'installed'; executable_path: string }
+  | { kind: 'error'; message: string }
+
+type Session = {
+  currentUser: string
+  games: Game[]
+  installs: Record<string, GameInstallStatus>
+}
 
 type AppState =
   | { view: 'login' }
@@ -15,9 +25,37 @@ type AppState =
 function App(): React.JSX.Element {
   const [state, setState] = useState<AppState>({ view: 'login' })
 
+  const updateInstallStatus = (gameId: string, status: GameInstallStatus): void => {
+    setState((prev) => {
+      if (prev.view === 'login') return prev
+      return {
+        ...prev,
+        session: {
+          ...prev.session,
+          installs: { ...prev.session.installs, [gameId]: status }
+        }
+      }
+    })
+  }
+
   const signIn = async (currentUser: string): Promise<void> => {
-    const manifest = await window.api.catalog()
-    setState({ view: 'welcome', session: { currentUser, games: manifest.games } })
+    const [manifest, installed] = await Promise.all([
+      window.api.catalog(),
+      window.api.installedGames()
+    ])
+
+    const installs: Record<string, GameInstallStatus> = {}
+    for (const game of manifest.games) {
+      installs[game.id] = { kind: 'idle' }
+    }
+    for (const record of installed) {
+      installs[record.id] = { kind: 'installed', executable_path: record.executable_path }
+    }
+
+    setState({
+      view: 'welcome',
+      session: { currentUser, games: manifest.games, installs }
+    })
   }
 
   const signOut = (): void => setState({ view: 'login' })
@@ -34,6 +72,23 @@ function App(): React.JSX.Element {
     }
   }
 
+  const installGame = async (gameId: string): Promise<void> => {
+    updateInstallStatus(gameId, { kind: 'installing' })
+    const result = await window.api.install(gameId)
+    if (result.ok) {
+      updateInstallStatus(gameId, {
+        kind: 'installed',
+        executable_path: result.record.executable_path
+      })
+    } else {
+      updateInstallStatus(gameId, { kind: 'error', message: result.error })
+    }
+  }
+
+  const launchGame = async (gameId: string): Promise<void> => {
+    await window.api.launch(gameId)
+  }
+
   if (state.view === 'login') {
     return <LoginView onSignIn={signIn} />
   }
@@ -41,6 +96,10 @@ function App(): React.JSX.Element {
   const selectedGame =
     state.view === 'gameDetail'
       ? (state.session.games.find((g) => g.id === state.selectedGameId) ?? null)
+      : null
+  const selectedStatus =
+    state.view === 'gameDetail'
+      ? (state.session.installs[state.selectedGameId] ?? { kind: 'idle' })
       : null
 
   return (
@@ -52,7 +111,14 @@ function App(): React.JSX.Element {
       onSignOut={signOut}
     >
       {state.view === 'welcome' && <WelcomeView username={state.session.currentUser} />}
-      {selectedGame && <GameDetailView game={selectedGame} />}
+      {selectedGame && selectedStatus && (
+        <GameDetailView
+          game={selectedGame}
+          status={selectedStatus}
+          onInstall={() => installGame(selectedGame.id)}
+          onLaunch={() => launchGame(selectedGame.id)}
+        />
+      )}
     </Shell>
   )
 }

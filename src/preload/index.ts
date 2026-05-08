@@ -1,10 +1,17 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import type { Manifest } from '../shared/types'
+import type { InstalledGame, Manifest } from '../shared/types'
+
+type InstallResult = { ok: true; record: InstalledGame } | { ok: false; error: string }
+
+type LaunchResult = { ok: true; exit_code: number } | { ok: false; error: string }
 
 const api = {
   request: (message: unknown): Promise<unknown> => ipcRenderer.invoke('forge:request', message),
-  catalog: (): Promise<Manifest> => ipcRenderer.invoke('forge:catalog')
+  catalog: (): Promise<Manifest> => ipcRenderer.invoke('forge:catalog'),
+  installedGames: (): Promise<InstalledGame[]> => ipcRenderer.invoke('forge:installed_games'),
+  install: (gameId: string): Promise<InstallResult> => ipcRenderer.invoke('forge:install', gameId),
+  launch: (gameId: string): Promise<LaunchResult> => ipcRenderer.invoke('forge:launch', gameId)
 }
 
 if (process.contextIsolated) {

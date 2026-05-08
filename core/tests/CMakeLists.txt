@@ -28,6 +28,7 @@ add_executable(forge_core_tests
   test_archive.cpp
   test_http.cpp
   test_launch.cpp
+  test_install.cpp
 )
 target_link_libraries(forge_core_tests PRIVATE
   forge_protocol
