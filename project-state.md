@@ -1,7 +1,7 @@
 # Forge — Project State
 
-**Last updated:** May 6, 2026
-**Status:** 🟢 Phase 0 complete + UI/UX design locked ([design/README.md](./design/README.md)). Ready to start Phase 1.
+**Last updated:** May 7, 2026
+**Status:** 🟢 Phase 1 in progress — login, catalog, and C++ install primitives (download / SHA-256 / zip extract) all green on CI. Launch primitive, install orchestrator (UI-wired), and stub binaries still pending before the demo milestone.
 
 ---
 
@@ -92,10 +92,12 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] GitHub Actions: lint, format, build, **run tests** on the chosen target OS (`.github/workflows/ci.yml`, runs on `windows-latest`, Node 22, vcvars via `ilammy/msvc-dev-cmd`. Uses a separate `ninja` CMake preset so the user's local `default` preset (VS 2026) stays untouched. Vitest's bridge test resolves the binary via `FORGE_CORE_PATH` env var with the local default as fallback. Verified locally end-to-end; first GitHub run pending an actual push.)
 
 ### Phase 1 — Core flow (≈1–2 weeks)
-- [ ] Stub login screen → fake session
-- [ ] Catalog page: render games from a static JSON manifest
-- [ ] C++ core: HTTP download + SHA-256 verification + zip extract, with gtest unit coverage
+- [x] Stub login screen → fake session
+- [x] Catalog page: render games from a static JSON manifest
+- [x] C++ core: HTTP download + SHA-256 verification + zip extract, with gtest unit coverage
 - [ ] C++ core: spawn the installed binary, surface exit code to the UI, with an integration test
+- [ ] C++ core: install orchestrator (download + verify + extract) wired to IPC; Install button enabled with button-as-progress per design; install state persisted to a JSON file under `app.getPath('userData')` and reloaded on startup
+- [ ] Build & host the stub binaries: tiny CMake sub-project for `forge-stub-success` and `forge-stub-crash`; mirror as zips to a `forge-catalog` GitHub release; fill real SHA-256 values in `manifest.json`
 - [ ] **Milestone: log in, install a sample game, launch it from the UI** ← demo-ready, with passing tests
 
 ### Phase 2 — Polish & ship (≈1 week)
