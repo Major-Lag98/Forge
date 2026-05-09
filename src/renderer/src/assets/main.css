@@ -275,3 +275,27 @@
   font-size: 14px;
   font-weight: 500;
 }
+
+.game-uninstall {
+  align-self: flex-start;
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.game-uninstall:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.game-uninstall:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

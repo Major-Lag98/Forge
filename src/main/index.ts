@@ -5,7 +5,8 @@ import icon from '../../resources/icon.png?asset'
 import { CoreBridge } from './core-bridge'
 import manifest from './manifest.json'
 import type { InstalledGame, Manifest } from '../shared/types'
-import { loadInstallRecords, saveInstallRecord } from './installs'
+import { promises as fsp } from 'node:fs'
+import { loadInstallRecords, removeInstallRecord, saveInstallRecord } from './installs'
 
 const coreBridge = new CoreBridge()
 const corePath =
@@ -89,6 +90,21 @@ app.whenReady().then(() => {
     }
     await saveInstallRecord(record)
     return { ok: true, record } as const
+  })
+
+  ipcMain.handle('forge:uninstall', async (_event, gameId: string) => {
+    const records = await loadInstallRecords()
+    const record = records.find((r) => r.id === gameId)
+    if (!record) return { ok: false, error: `not installed: ${gameId}` } as const
+
+    try {
+      await fsp.rm(record.install_dir, { recursive: true, force: true })
+      await removeInstallRecord(gameId)
+      return { ok: true } as const
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      return { ok: false, error: msg } as const
+    }
   })
 
   ipcMain.handle('forge:launch', async (_event, gameId: string) => {

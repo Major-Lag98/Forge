@@ -9,6 +9,7 @@ export type GameInstallStatus =
   | { kind: 'idle' }
   | { kind: 'installing' }
   | { kind: 'installed'; executable_path: string }
+  | { kind: 'uninstalling' }
   | { kind: 'error'; message: string }
 
 type Session = {
@@ -85,6 +86,16 @@ function App(): React.JSX.Element {
     }
   }
 
+  const uninstallGame = async (gameId: string): Promise<void> => {
+    updateInstallStatus(gameId, { kind: 'uninstalling' })
+    const result = await window.api.uninstall(gameId)
+    if (result.ok) {
+      updateInstallStatus(gameId, { kind: 'idle' })
+    } else {
+      updateInstallStatus(gameId, { kind: 'error', message: result.error })
+    }
+  }
+
   const launchGame = async (gameId: string): Promise<void> => {
     await window.api.launch(gameId)
   }
@@ -117,6 +128,7 @@ function App(): React.JSX.Element {
           status={selectedStatus}
           onInstall={() => installGame(selectedGame.id)}
           onLaunch={() => launchGame(selectedGame.id)}
+          onUninstall={() => uninstallGame(selectedGame.id)}
         />
       )}
     </Shell>

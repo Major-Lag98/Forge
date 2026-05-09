@@ -4,6 +4,8 @@ import type { InstalledGame, Manifest } from '../shared/types'
 
 type InstallResult = { ok: true; record: InstalledGame } | { ok: false; error: string }
 
+type UninstallResult = { ok: true } | { ok: false; error: string }
+
 type LaunchResult = { ok: true; exit_code: number } | { ok: false; error: string }
 
 const api = {
@@ -11,6 +13,8 @@ const api = {
   catalog: (): Promise<Manifest> => ipcRenderer.invoke('forge:catalog'),
   installedGames: (): Promise<InstalledGame[]> => ipcRenderer.invoke('forge:installed_games'),
   install: (gameId: string): Promise<InstallResult> => ipcRenderer.invoke('forge:install', gameId),
+  uninstall: (gameId: string): Promise<UninstallResult> =>
+    ipcRenderer.invoke('forge:uninstall', gameId),
   launch: (gameId: string): Promise<LaunchResult> => ipcRenderer.invoke('forge:launch', gameId)
 }
 

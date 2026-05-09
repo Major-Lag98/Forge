@@ -39,3 +39,16 @@ export async function saveInstallRecord(record: InstalledGame, filePath?: string
   await fs.mkdir(dirname(path), { recursive: true })
   await fs.writeFile(path, JSON.stringify(next, null, 2), 'utf8')
 }
+
+export async function removeInstallRecord(id: string, filePath?: string): Promise<void> {
+  const path = filePath ?? defaultInstallsFilePath()
+  const existing = await loadInstallRecords(path)
+  const without = existing.filter((r) => r.id !== id)
+  if (without.length === existing.length) return
+  const next: InstallStateFile = {
+    schema_version: SCHEMA_VERSION,
+    installs: without
+  }
+  await fs.mkdir(dirname(path), { recursive: true })
+  await fs.writeFile(path, JSON.stringify(next, null, 2), 'utf8')
+}

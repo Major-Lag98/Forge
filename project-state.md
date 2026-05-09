@@ -96,9 +96,10 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] Catalog page: render games from a static JSON manifest
 - [x] C++ core: HTTP download + SHA-256 verification + zip extract, with gtest unit coverage
 - [ ] C++ core: spawn the installed binary, surface exit code to the UI, with an integration test
-- [ ] (4.5a) C++ install orchestrator (download + verify + extract) wired to IPC; install state persisted to a JSON file under `app.getPath('userData')` and reloaded on startup; Install → Play button transition works (Install button shows "Installing…" text — real progress percentage deferred to 4.5b)
-- [ ] (4.5b) Design polish: protocol IDs + event messages so the IPC bridge supports streaming progress; button-as-progress with percentage during install; uninstall button under Play with two-click inline confirm
+- [x] (4.5a) C++ install orchestrator (download + verify + extract) wired to IPC; install state persisted to a JSON file under `app.getPath('userData')` and reloaded on startup; Install → Play button transition works (Install button shows "Installing…" text — real progress percentage deferred to 4.5b-progress)
+- [ ] (4.5b-uninstall) Uninstall button below Play with two-click inline confirm; main-process `fs.rm` of `install_dir` + remove the record from persisted state
 - [ ] Build & host the stub binaries: tiny CMake sub-project for `forge-stub-success` and `forge-stub-crash`; mirror as zips to a `forge-catalog` GitHub release; fill real SHA-256 values in `manifest.json`
+- [ ] (4.5b-progress) Protocol IDs + event messages on the IPC bridge so install can stream progress; button-as-progress with real percentage during install
 - [ ] **Milestone: log in, install a sample game, launch it from the UI** ← demo-ready, with passing tests
 
 ### Phase 2 — Polish & ship (≈1 week)

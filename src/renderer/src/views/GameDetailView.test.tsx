@@ -22,14 +22,26 @@ const noop = (): void => {}
 describe('GameDetailView', () => {
   it('renders the game name as the title heading', () => {
     render(
-      <GameDetailView game={game} status={{ kind: 'idle' }} onInstall={noop} onLaunch={noop} />
+      <GameDetailView
+        game={game}
+        status={{ kind: 'idle' }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
     )
     expect(screen.queryByRole('heading', { name: 'Mindustry' })).not.toBeNull()
   })
 
   it('renders the description text', () => {
     render(
-      <GameDetailView game={game} status={{ kind: 'idle' }} onInstall={noop} onLaunch={noop} />
+      <GameDetailView
+        game={game}
+        status={{ kind: 'idle' }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
     )
     expect(screen.queryByText('A factory game.')).not.toBeNull()
   })
@@ -38,9 +50,15 @@ describe('GameDetailView', () => {
     const onInstall = vi.fn()
     const user = userEvent.setup()
     render(
-      <GameDetailView game={game} status={{ kind: 'idle' }} onInstall={onInstall} onLaunch={noop} />
+      <GameDetailView
+        game={game}
+        status={{ kind: 'idle' }}
+        onInstall={onInstall}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
     )
-    await user.click(screen.getByRole('button', { name: /install/i }))
+    await user.click(screen.getByRole('button', { name: /^install$/i }))
     expect(onInstall).toHaveBeenCalled()
   })
 
@@ -51,6 +69,7 @@ describe('GameDetailView', () => {
         status={{ kind: 'installing' }}
         onInstall={noop}
         onLaunch={noop}
+        onUninstall={noop}
       />
     )
     const button = screen.getByRole('button', { name: /installing/i })
@@ -66,6 +85,7 @@ describe('GameDetailView', () => {
         status={{ kind: 'installed', executable_path: 'C:/x/m.exe' }}
         onInstall={noop}
         onLaunch={onLaunch}
+        onUninstall={noop}
       />
     )
     await user.click(screen.getByRole('button', { name: /play/i }))
@@ -79,9 +99,59 @@ describe('GameDetailView', () => {
         status={{ kind: 'error', message: 'SHA-256 mismatch' }}
         onInstall={noop}
         onLaunch={noop}
+        onUninstall={noop}
       />
     )
     expect(screen.queryByRole('button', { name: /install/i })).not.toBeNull()
     expect(screen.queryByText('SHA-256 mismatch')).not.toBeNull()
+  })
+
+  it('hides the Uninstall button when not installed', () => {
+    render(
+      <GameDetailView
+        game={game}
+        status={{ kind: 'idle' }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
+    )
+    expect(screen.queryByRole('button', { name: /uninstall/i })).toBeNull()
+  })
+
+  it('shows an Uninstall button when installed and fires onUninstall on the second click', async () => {
+    const onUninstall = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <GameDetailView
+        game={game}
+        status={{ kind: 'installed', executable_path: 'C:/x/m.exe' }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={onUninstall}
+      />
+    )
+
+    const button = screen.getByRole('button', { name: /^uninstall$/i })
+    await user.click(button)
+    expect(onUninstall).not.toHaveBeenCalled()
+
+    const confirmButton = screen.getByRole('button', { name: /confirm uninstall\?/i })
+    await user.click(confirmButton)
+    expect(onUninstall).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows a disabled Uninstalling… button while uninstalling', () => {
+    render(
+      <GameDetailView
+        game={game}
+        status={{ kind: 'uninstalling' }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
+    )
+    const button = screen.getByRole('button', { name: /uninstalling/i })
+    expect(button.hasAttribute('disabled')).toBe(true)
   })
 })

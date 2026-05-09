@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { loadInstallRecords, saveInstallRecord } from './installs'
+import { loadInstallRecords, removeInstallRecord, saveInstallRecord } from './installs'
 import type { InstalledGame } from '../shared/types'
 
 describe('installs persistence', () => {
@@ -59,5 +59,24 @@ describe('installs persistence', () => {
     expect(records).toHaveLength(2)
     const ids = records.map((r) => r.id).sort()
     expect(ids).toEqual(['forge-stub-success', 'mindustry'])
+  })
+
+  it('removes a record by id and preserves others', async () => {
+    const a = sample
+    const b: InstalledGame = { ...sample, id: 'forge-stub-success' }
+    await saveInstallRecord(a, filePath)
+    await saveInstallRecord(b, filePath)
+
+    await removeInstallRecord('mindustry', filePath)
+
+    const records = await loadInstallRecords(filePath)
+    expect(records).toEqual([b])
+  })
+
+  it('is a no-op when removing a non-existent record', async () => {
+    await saveInstallRecord(sample, filePath)
+    await removeInstallRecord('does-not-exist', filePath)
+    const records = await loadInstallRecords(filePath)
+    expect(records).toEqual([sample])
   })
 })
