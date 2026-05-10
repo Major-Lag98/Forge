@@ -7,7 +7,7 @@ import type { Game } from '../../shared/types'
 
 export type GameInstallStatus =
   | { kind: 'idle' }
-  | { kind: 'installing'; percent?: number }
+  | { kind: 'installing'; phase?: string; percent?: number }
   | { kind: 'installed'; executable_path: string; last_launch_error?: string }
   | { kind: 'uninstalling' }
   | { kind: 'error'; message: string }
@@ -40,7 +40,7 @@ function App(): React.JSX.Element {
   }
 
   useEffect(() => {
-    return window.api.onInstallProgress((gameId, percent) => {
+    return window.api.onInstallProgress((gameId, phase, percent) => {
       setState((prev) => {
         if (prev.view === 'login') return prev
         const current = prev.session.installs[gameId]
@@ -52,7 +52,7 @@ function App(): React.JSX.Element {
             ...prev.session,
             installs: {
               ...prev.session.installs,
-              [gameId]: { kind: 'installing', percent }
+              [gameId]: { kind: 'installing', phase, percent }
             }
           }
         }

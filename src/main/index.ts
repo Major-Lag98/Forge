@@ -81,6 +81,7 @@ app.whenReady().then(() => {
           if (progress.event === 'progress' && typeof progress.percent === 'number') {
             event.sender.send('forge:install_progress', {
               gameId,
+              phase: typeof progress.phase === 'string' ? progress.phase : undefined,
               percent: progress.percent
             })
           }

@@ -56,9 +56,23 @@ function ActionButton({
   onLaunch
 }: ActionButtonProps): React.JSX.Element | null {
   if (status.kind === 'installing') {
-    const percent = status.percent
-    const label = typeof percent === 'number' ? `Installing… ${percent}%` : 'Installing…'
-    const fill = typeof percent === 'number' ? `${percent}%` : '0%'
+    const { phase, percent } = status
+    const pctText = typeof percent === 'number' ? ` ${percent}%` : ''
+    let label: string
+    let fill: string
+    if (phase === 'download') {
+      label = `Downloading…${pctText}`
+      fill = typeof percent === 'number' ? `${percent}%` : '0%'
+    } else if (phase === 'verify') {
+      label = 'Verifying…'
+      fill = '100%'
+    } else if (phase === 'extract') {
+      label = `Extracting…${pctText}`
+      fill = typeof percent === 'number' ? `${percent}%` : '0%'
+    } else {
+      label = `Installing…${pctText}`
+      fill = typeof percent === 'number' ? `${percent}%` : '0%'
+    }
     return (
       <button
         type="button"

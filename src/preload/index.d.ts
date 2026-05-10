@@ -12,7 +12,9 @@ interface ForgeAPI {
   install: (gameId: string) => Promise<InstallResult>
   uninstall: (gameId: string) => Promise<UninstallResult>
   launch: (gameId: string) => Promise<LaunchResult>
-  onInstallProgress: (listener: (gameId: string, percent: number) => void) => () => void
+  onInstallProgress: (
+    listener: (gameId: string, phase: string | undefined, percent: number) => void
+  ) => () => void
 }
 
 declare global {

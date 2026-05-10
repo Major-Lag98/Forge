@@ -45,8 +45,8 @@ nlohmann::json dispatch(const nlohmann::json& request, EmitEvent emit_event) {
 
         ProgressCallback on_progress;
         if (emit_event) {
-            on_progress = [&emit_event](int percent) {
-                emit_event({{"event", "progress"}, {"phase", "download"}, {"percent", percent}});
+            on_progress = [&emit_event](const std::string& phase, int percent) {
+                emit_event({{"event", "progress"}, {"phase", phase}, {"percent", percent}});
             };
         }
 

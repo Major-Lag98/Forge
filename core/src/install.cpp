@@ -45,6 +45,7 @@ std::expected<void, std::string> install(
         return std::unexpected("Download failed: " + r.error());
     }
 
+    if (on_progress) on_progress("verify", 0);
     auto hash_result = sha256_of_file(temp_zip);
     if (!hash_result) {
         std::filesystem::remove(temp_zip, ec);
@@ -56,8 +57,9 @@ std::expected<void, std::string> install(
         return std::unexpected("SHA-256 mismatch: expected " + expected_sha256 +
                                ", got " + hash_result.value());
     }
+    if (on_progress) on_progress("verify", 100);
 
-    if (auto r = extract_zip(temp_zip, install_dir); !r) {
+    if (auto r = extract_zip(temp_zip, install_dir, on_progress); !r) {
         std::filesystem::remove(temp_zip, ec);
         return std::unexpected("Extract failed: " + r.error());
     }

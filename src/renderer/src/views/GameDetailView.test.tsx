@@ -62,7 +62,7 @@ describe('GameDetailView', () => {
     expect(onInstall).toHaveBeenCalled()
   })
 
-  it('shows a disabled Installing… button while installing without a percent', () => {
+  it('shows a generic Installing… button while installing without phase or percent', () => {
     render(
       <GameDetailView
         game={game}
@@ -76,20 +76,50 @@ describe('GameDetailView', () => {
     expect(button.hasAttribute('disabled')).toBe(true)
   })
 
-  it('shows the percent label and progress fill while installing with a percent', () => {
+  it('shows Downloading… <percent>% with a matching fill during the download phase', () => {
     render(
       <GameDetailView
         game={game}
-        status={{ kind: 'installing', percent: 42 }}
+        status={{ kind: 'installing', phase: 'download', percent: 42 }}
         onInstall={noop}
         onLaunch={noop}
         onUninstall={noop}
       />
     )
-    const button = screen.getByRole('button', { name: /installing… 42%/i })
+    const button = screen.getByRole('button', { name: /downloading… 42%/i })
     expect(button.hasAttribute('disabled')).toBe(true)
     expect(button.className).toContain('game-action-progress')
     expect((button as HTMLElement).style.getPropertyValue('--progress-fill')).toBe('42%')
+  })
+
+  it('shows Verifying… with a full bar during the verify phase', () => {
+    render(
+      <GameDetailView
+        game={game}
+        status={{ kind: 'installing', phase: 'verify', percent: 100 }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
+    )
+    const button = screen.getByRole('button', { name: /^verifying…$/i })
+    expect(button.hasAttribute('disabled')).toBe(true)
+    expect((button as HTMLElement).style.getPropertyValue('--progress-fill')).toBe('100%')
+  })
+
+  it('shows Extracting… <percent>% with a matching fill during the extract phase', () => {
+    render(
+      <GameDetailView
+        game={game}
+        status={{ kind: 'installing', phase: 'extract', percent: 35 }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
+    )
+    const button = screen.getByRole('button', { name: /extracting… 35%/i })
+    expect(button.hasAttribute('disabled')).toBe(true)
+    expect((button as HTMLElement).style.getPropertyValue('--progress-fill')).toBe('35%')
   })
 
   it('shows a Play button when installed and fires onLaunch on click', async () => {

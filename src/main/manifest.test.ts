@@ -9,9 +9,9 @@ describe('manifest.json', () => {
     expect(m.schema_version).toBe(1)
   })
 
-  it('contains the three v0.1 games', () => {
+  it('contains the expected catalog game IDs', () => {
     const ids = m.games.map((g) => g.id).sort()
-    expect(ids).toEqual(['forge-stub-crash', 'forge-stub-success', 'mindustry'])
+    expect(ids).toEqual(['forge-test-2', 'mindustry'])
   })
 
   it('every game has the required fields and the expected shape', () => {

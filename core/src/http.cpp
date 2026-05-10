@@ -28,7 +28,7 @@ std::expected<void, std::string> download(
                         static_cast<long long>(down_total));
                     if (pct != last_percent) {
                         last_percent = pct;
-                        on_progress(pct);
+                        on_progress("download", pct);
                     }
                 }
                 return true;

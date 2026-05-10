@@ -26,7 +26,8 @@ bool is_safe_zip_entry(const std::string& name) {
 
 std::expected<void, std::string> extract_zip(
     const std::filesystem::path& zip_path,
-    const std::filesystem::path& dest_dir) {
+    const std::filesystem::path& dest_dir,
+    ProgressCallback on_progress) {
     int error_code = 0;
     zip_t* zip = zip_open(zip_path.string().c_str(), ZIP_RDONLY, &error_code);
     if (!zip) {
@@ -46,6 +47,7 @@ std::expected<void, std::string> extract_zip(
     }
 
     const auto num_entries = zip_get_num_entries(zip, 0);
+    int last_percent = -1;
     for (zip_int64_t i = 0; i < num_entries; ++i) {
         const char* raw_name = zip_get_name(zip, i, 0);
         if (!raw_name) {
@@ -109,6 +111,14 @@ std::expected<void, std::string> extract_zip(
         }
 
         zip_fclose(zf);
+
+        if (on_progress && num_entries > 0) {
+            const int pct = static_cast<int>(((i + 1) * 100) / num_entries);
+            if (pct != last_percent) {
+                last_percent = pct;
+                on_progress("extract", pct);
+            }
+        }
     }
 
     zip_close(zip);

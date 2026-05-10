@@ -134,20 +134,26 @@ TEST_F(InstallTest, ReturnsErrorOn404) {
     EXPECT_FALSE(result.has_value());
 }
 
-TEST_F(InstallTest, EmitsDownloadProgress) {
+TEST_F(InstallTest, EmitsProgressForAllPhases) {
     const std::string url = "http://127.0.0.1:" + std::to_string(port) + "/payload.zip";
     const fs::path install_dir = tmp_dir / "installed";
 
     int callback_count = 0;
-    int last_percent = -1;
-    auto on_progress = [&](int percent) {
+    bool saw_download = false;
+    bool saw_verify = false;
+    bool saw_extract = false;
+    auto on_progress = [&](const std::string& phase, int /*percent*/) {
         ++callback_count;
-        last_percent = percent;
+        if (phase == "download") saw_download = true;
+        else if (phase == "verify") saw_verify = true;
+        else if (phase == "extract") saw_extract = true;
     };
 
     const auto result = forge::install(url, zip_sha256, install_dir, on_progress);
     ASSERT_TRUE(result.has_value()) << result.error();
 
     EXPECT_GT(callback_count, 0);
-    EXPECT_EQ(last_percent, 100);
+    EXPECT_TRUE(saw_download);
+    EXPECT_TRUE(saw_verify);
+    EXPECT_TRUE(saw_extract);
 }
