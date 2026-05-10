@@ -1,7 +1,7 @@
 # Forge — Project State
 
-**Last updated:** May 7, 2026
-**Status:** 🟢 Phase 1 in progress — login, catalog, install primitives (download / hash / extract), launch primitive, and the install → play UI flow all in. Progress percentage, uninstall, and stub binaries pending before the demo milestone.
+**Last updated:** May 16, 2026
+**Status:** 🟢 Phase 1 demo milestone reached — log in → install a stub → launch → exit code surfaced in the UI, all green end-to-end on Windows CI. Remaining Phase 1 polish: 4.5b-progress (button-as-progress percentage via a protocol-ID + event-message refactor).
 
 ---
 
@@ -95,12 +95,12 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] Stub login screen → fake session
 - [x] Catalog page: render games from a static JSON manifest
 - [x] C++ core: HTTP download + SHA-256 verification + zip extract, with gtest unit coverage
-- [ ] C++ core: spawn the installed binary, surface exit code to the UI, with an integration test
+- [x] C++ core: spawn the installed binary, surface exit code to the UI, with an integration test (`launch.cpp` uses `CreateProcessW` + `CREATE_NEW_CONSOLE` so child stdio doesn't pollute the IPC bridge; vitest IPC integration test covers the full round-trip)
 - [x] (4.5a) C++ install orchestrator (download + verify + extract) wired to IPC; install state persisted to a JSON file under `app.getPath('userData')` and reloaded on startup; Install → Play button transition works (Install button shows "Installing…" text — real progress percentage deferred to 4.5b-progress)
-- [ ] (4.5b-uninstall) Uninstall button below Play with two-click inline confirm; main-process `fs.rm` of `install_dir` + remove the record from persisted state
-- [ ] Build & host the stub binaries: tiny CMake sub-project for `forge-stub-success` and `forge-stub-crash`; mirror as zips to a `forge-catalog` GitHub release; fill real SHA-256 values in `manifest.json`
+- [x] (4.5b-uninstall) Uninstall button below Play with two-click inline confirm; main-process `fs.rm` of `install_dir` + remove the record from persisted state
+- [x] Build & host the stub binaries: `stubs/` CMake sub-project produces `forge-stub-success` and `forge-stub-crash`; `stubs/package.ps1` builds + zips them; published as zips on this repo's `stubs-1.0.0` release (kept artifacts in the same repo for v0.1 — separate `forge-catalog` repo deferred); real SHA-256 values in `manifest.json`. Bundled in the same step: launch errors (`last_launch_error` on `'installed'` status) surfaced in the right pane below Play.
 - [ ] (4.5b-progress) Protocol IDs + event messages on the IPC bridge so install can stream progress; button-as-progress with real percentage during install
-- [ ] **Milestone: log in, install a sample game, launch it from the UI** ← demo-ready, with passing tests
+- [x] **Milestone: log in, install a sample game, launch it from the UI** — demo-ready, all tests green (ctest 20/20, vitest 33/33), CI green on `windows-latest`
 
 ### Phase 2 — Polish & ship (≈1 week)
 - [ ] One Playwright E2E test: launch app, install game, verify it runs
