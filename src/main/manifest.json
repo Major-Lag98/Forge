@@ -7,8 +7,8 @@
       "version": "1.0.0",
       "description": "Test stub that exits cleanly. Verifies the launcher's happy-path install and launch flow end-to-end.",
       "platform": "windows-x64",
-      "url": "https://github.com/Major-Lag98/forge-catalog/releases/download/stubs-1.0.0/forge-stub-success-windows-x64.zip",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "url": "https://github.com/Major-Lag98/Forge/releases/download/stubs-1.0.0/forge-stub-success-windows-x64.zip",
+      "sha256": "c0cdda275dc51b333f340da628221b2edc4323e74954977361da35bc92c90059",
       "size_bytes": 50000,
       "executable": "forge-stub-success.exe"
     },
@@ -18,8 +18,8 @@
       "version": "1.0.0",
       "description": "Test stub that exits with code 1. Verifies the launcher's error-surfacing path.",
       "platform": "windows-x64",
-      "url": "https://github.com/Major-Lag98/forge-catalog/releases/download/stubs-1.0.0/forge-stub-crash-windows-x64.zip",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "url": "https://github.com/Major-Lag98/Forge/releases/download/stubs-1.0.0/forge-stub-crash-windows-x64.zip",
+      "sha256": "394d80a776f0e57c01ee7235252adbefae3bc66a9a95ab2a1be7f31c0f652bcb",
       "size_bytes": 50000,
       "executable": "forge-stub-crash.exe"
     },

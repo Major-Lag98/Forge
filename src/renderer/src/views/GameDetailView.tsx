@@ -26,11 +26,19 @@ export function GameDetailView({
         status={status}
         onUninstall={onUninstall}
       />
-      {status.kind === 'error' && (
-        <p className="game-error" role="alert">
-          {status.message}
-        </p>
-      )}
+      {(() => {
+        const error =
+          status.kind === 'error'
+            ? status.message
+            : status.kind === 'installed'
+              ? status.last_launch_error
+              : undefined
+        return error ? (
+          <p className="game-error" role="alert">
+            {error}
+          </p>
+        ) : null
+      })()}
       <p className="game-description">{game.description}</p>
     </div>
   )

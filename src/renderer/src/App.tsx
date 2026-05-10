@@ -8,7 +8,7 @@ import type { Game } from '../../shared/types'
 export type GameInstallStatus =
   | { kind: 'idle' }
   | { kind: 'installing' }
-  | { kind: 'installed'; executable_path: string }
+  | { kind: 'installed'; executable_path: string; last_launch_error?: string }
   | { kind: 'uninstalling' }
   | { kind: 'error'; message: string }
 
@@ -97,7 +97,24 @@ function App(): React.JSX.Element {
   }
 
   const launchGame = async (gameId: string): Promise<void> => {
-    await window.api.launch(gameId)
+    if (state.view === 'login') return
+    const current = state.session.installs[gameId]
+    if (!current || current.kind !== 'installed') return
+    const executable_path = current.executable_path
+
+    // Clear any previous launch error while we're trying.
+    updateInstallStatus(gameId, { kind: 'installed', executable_path })
+
+    const result = await window.api.launch(gameId)
+
+    let last_launch_error: string | undefined
+    if (!result.ok) {
+      last_launch_error = `Launch failed: ${result.error}`
+    } else if (result.exit_code !== 0) {
+      last_launch_error = `Game exited with code ${result.exit_code}`
+    }
+
+    updateInstallStatus(gameId, { kind: 'installed', executable_path, last_launch_error })
   }
 
   if (state.view === 'login') {

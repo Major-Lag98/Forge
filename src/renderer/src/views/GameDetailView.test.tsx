@@ -154,4 +154,35 @@ describe('GameDetailView', () => {
     const button = screen.getByRole('button', { name: /uninstalling/i })
     expect(button.hasAttribute('disabled')).toBe(true)
   })
+
+  it('shows last_launch_error below the Play button when set', () => {
+    render(
+      <GameDetailView
+        game={game}
+        status={{
+          kind: 'installed',
+          executable_path: 'C:/x/m.exe',
+          last_launch_error: 'Game exited with code 1'
+        }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
+    )
+    expect(screen.queryByText('Game exited with code 1')).not.toBeNull()
+    expect(screen.queryByRole('button', { name: /play/i })).not.toBeNull()
+  })
+
+  it('does not render an error paragraph for a clean installed state', () => {
+    render(
+      <GameDetailView
+        game={game}
+        status={{ kind: 'installed', executable_path: 'C:/x/m.exe' }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
+    )
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
 })
