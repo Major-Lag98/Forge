@@ -33,13 +33,17 @@ std::expected<int, std::string> launch(
     si.cb = sizeof(si);
     PROCESS_INFORMATION pi{};
 
+    // CREATE_NEW_CONSOLE: give the child its own console + stdio. Without this,
+    // a console-subsystem child inherits forge_core's stdio handles, which on
+    // Electron means its stdout flows back into the IPC pipe and breaks JSON
+    // framing on the bridge.
     const BOOL ok = CreateProcessW(
         app_name.c_str(),
         cmd_line.data(),
         nullptr,
         nullptr,
         FALSE,
-        0,
+        CREATE_NEW_CONSOLE,
         nullptr,
         wd.empty() ? nullptr : wd.c_str(),
         &si,
