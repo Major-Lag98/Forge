@@ -133,3 +133,21 @@ TEST_F(InstallTest, ReturnsErrorOn404) {
     const auto result = forge::install(url, zip_sha256, install_dir);
     EXPECT_FALSE(result.has_value());
 }
+
+TEST_F(InstallTest, EmitsDownloadProgress) {
+    const std::string url = "http://127.0.0.1:" + std::to_string(port) + "/payload.zip";
+    const fs::path install_dir = tmp_dir / "installed";
+
+    int callback_count = 0;
+    int last_percent = -1;
+    auto on_progress = [&](int percent) {
+        ++callback_count;
+        last_percent = percent;
+    };
+
+    const auto result = forge::install(url, zip_sha256, install_dir, on_progress);
+    ASSERT_TRUE(result.has_value()) << result.error();
+
+    EXPECT_GT(callback_count, 0);
+    EXPECT_EQ(last_percent, 100);
+}

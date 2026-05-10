@@ -10,6 +10,14 @@
   #include <io.h>
 #endif
 
+namespace {
+
+void write_line(const nlohmann::json& message) {
+    std::cout << message.dump() << '\n' << std::flush;
+}
+
+}
+
 int main() {
 #ifdef _WIN32
     _setmode(_fileno(stdin), _O_BINARY);
@@ -23,15 +31,32 @@ int main() {
         }
         if (line.empty()) continue;
 
-        nlohmann::json response;
+        nlohmann::json id = nullptr;
+        nlohmann::json envelope;
         try {
             const auto request = nlohmann::json::parse(line);
-            response = forge::dispatch(request);
+            if (request.contains("id")) {
+                id = request["id"];
+            }
+
+            forge::EmitEvent emit_event = [&id](const nlohmann::json& event) {
+                nlohmann::json wrapped = event;
+                wrapped["id"] = id;
+                write_line(wrapped);
+            };
+
+            const auto inner = forge::dispatch(request, emit_event);
+            envelope["id"] = id;
+            if (inner.contains("error")) {
+                envelope["error"] = inner["error"];
+            } else {
+                envelope["result"] = inner;
+            }
         } catch (const nlohmann::json::parse_error& e) {
-            response = {{"error", "parse error"}, {"message", e.what()}};
+            envelope = {{"id", id}, {"error", std::string{"parse error: "} + e.what()}};
         }
 
-        std::cout << response.dump() << '\n' << std::flush;
+        write_line(envelope);
     }
     return 0;
 }

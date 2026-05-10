@@ -56,9 +56,17 @@ function ActionButton({
   onLaunch
 }: ActionButtonProps): React.JSX.Element | null {
   if (status.kind === 'installing') {
+    const percent = status.percent
+    const label = typeof percent === 'number' ? `Installing… ${percent}%` : 'Installing…'
+    const fill = typeof percent === 'number' ? `${percent}%` : '0%'
     return (
-      <button type="button" className="game-action" disabled>
-        Installing…
+      <button
+        type="button"
+        className="game-action game-action-progress"
+        disabled
+        style={{ '--progress-fill': fill } as React.CSSProperties}
+      >
+        {label}
       </button>
     )
   }

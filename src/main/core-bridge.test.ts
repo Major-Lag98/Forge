@@ -45,4 +45,29 @@ describe('CoreBridge integration', () => {
     const response = await bridge.request({ op: 'launch', executable: helperZeroPath })
     expect(response).toEqual({ exit_code: 0 })
   })
+
+  it('rejects the promise when forge_core returns an error envelope', async () => {
+    if (!existsSync(corePath)) {
+      throw new Error(`forge_core.exe not found at ${corePath}.`)
+    }
+    bridge = new CoreBridge()
+    bridge.init(corePath)
+    await expect(bridge.request({ op: 'this-op-does-not-exist' })).rejects.toThrow(/unknown op/i)
+  })
+
+  it('correlates concurrent in-flight requests by id', async () => {
+    if (!existsSync(corePath)) {
+      throw new Error(`forge_core.exe not found at ${corePath}.`)
+    }
+    bridge = new CoreBridge()
+    bridge.init(corePath)
+    const responses = await Promise.all([
+      bridge.request({ op: 'ping' }),
+      bridge.request({ op: 'ping' }),
+      bridge.request({ op: 'ping' })
+    ])
+    for (const r of responses) {
+      expect(r).toEqual({ pong: true })
+    }
+  })
 })

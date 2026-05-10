@@ -62,7 +62,7 @@ describe('GameDetailView', () => {
     expect(onInstall).toHaveBeenCalled()
   })
 
-  it('shows a disabled Installing… button while installing', () => {
+  it('shows a disabled Installing… button while installing without a percent', () => {
     render(
       <GameDetailView
         game={game}
@@ -72,8 +72,24 @@ describe('GameDetailView', () => {
         onUninstall={noop}
       />
     )
-    const button = screen.getByRole('button', { name: /installing/i })
+    const button = screen.getByRole('button', { name: /^installing…$/i })
     expect(button.hasAttribute('disabled')).toBe(true)
+  })
+
+  it('shows the percent label and progress fill while installing with a percent', () => {
+    render(
+      <GameDetailView
+        game={game}
+        status={{ kind: 'installing', percent: 42 }}
+        onInstall={noop}
+        onLaunch={noop}
+        onUninstall={noop}
+      />
+    )
+    const button = screen.getByRole('button', { name: /installing… 42%/i })
+    expect(button.hasAttribute('disabled')).toBe(true)
+    expect(button.className).toContain('game-action-progress')
+    expect((button as HTMLElement).style.getPropertyValue('--progress-fill')).toBe('42%')
   })
 
   it('shows a Play button when installed and fires onLaunch on click', async () => {

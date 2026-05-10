@@ -29,7 +29,8 @@ bool ascii_iequals(std::string_view a, std::string_view b) {
 std::expected<void, std::string> install(
     const std::string& url,
     const std::string& expected_sha256,
-    const std::filesystem::path& install_dir) {
+    const std::filesystem::path& install_dir,
+    ProgressCallback on_progress) {
     const std::string key =
         install_dir.filename().string().empty()
             ? std::to_string(std::hash<std::string>{}(url))
@@ -40,7 +41,7 @@ std::expected<void, std::string> install(
     std::error_code ec;
     std::filesystem::remove(temp_zip, ec);
 
-    if (auto r = download(url, temp_zip); !r) {
+    if (auto r = download(url, temp_zip, on_progress); !r) {
         return std::unexpected("Download failed: " + r.error());
     }
 

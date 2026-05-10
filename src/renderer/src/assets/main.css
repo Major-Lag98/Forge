@@ -264,6 +264,24 @@
   cursor: not-allowed;
 }
 
+/* Button-as-progress: the install button itself fills with progress.
+   --progress-fill is a 0%..100% length set inline by the renderer. */
+.game-action-progress {
+  position: relative;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.16) var(--progress-fill, 0%),
+    var(--btn-bg) var(--progress-fill, 0%)
+  );
+  opacity: 1;
+  transition: background 200ms linear;
+}
+
+.game-action-progress:disabled {
+  cursor: progress;
+  opacity: 1;
+}
+
 .game-description {
   font-size: 16px;
   color: var(--text-muted);

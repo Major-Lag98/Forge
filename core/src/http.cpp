@@ -9,8 +9,33 @@ namespace forge {
 
 std::expected<void, std::string> download(
     const std::string& url,
-    const std::filesystem::path& dest) {
-    const auto response = cpr::Get(cpr::Url{url});
+    const std::filesystem::path& dest,
+    ProgressCallback on_progress) {
+    int last_percent = -1;
+
+    cpr::Session session;
+    session.SetUrl(cpr::Url{url});
+    if (on_progress) {
+        session.SetProgressCallback(cpr::ProgressCallback(
+            [&](cpr::cpr_pf_arg_t down_total,
+                cpr::cpr_pf_arg_t down_now,
+                cpr::cpr_pf_arg_t /*up_total*/,
+                cpr::cpr_pf_arg_t /*up_now*/,
+                intptr_t /*userdata*/) -> bool {
+                if (down_total > 0) {
+                    const auto pct = static_cast<int>(
+                        (static_cast<long long>(down_now) * 100) /
+                        static_cast<long long>(down_total));
+                    if (pct != last_percent) {
+                        last_percent = pct;
+                        on_progress(pct);
+                    }
+                }
+                return true;
+            }));
+    }
+
+    const auto response = session.Get();
 
     if (response.error) {
         return std::unexpected("HTTP error: " + response.error.message);

@@ -1,15 +1,24 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import { createInterface, type Interface } from 'node:readline'
 
-type PendingResolver = {
+export type ProgressEvent = {
+  event: string
+  [key: string]: unknown
+}
+
+export type ProgressCallback = (event: ProgressEvent) => void
+
+interface Pending {
   resolve: (value: unknown) => void
   reject: (error: Error) => void
+  onProgress?: ProgressCallback
 }
 
 export class CoreBridge {
   private process: ChildProcess | null = null
   private rl: Interface | null = null
-  private pending: PendingResolver[] = []
+  private nextId = 1
+  private pending: Map<number, Pending> = new Map()
 
   init(executablePath: string): void {
     if (this.process) {
@@ -23,33 +32,31 @@ export class CoreBridge {
         `forge_core exited (code=${code ?? 'null'}, signal=${signal ?? 'null'})`
       )
       const pending = this.pending
-      this.pending = []
-      for (const resolver of pending) resolver.reject(error)
+      this.pending = new Map()
+      for (const p of pending.values()) p.reject(error)
     })
 
     if (proc.stdout) {
       this.rl = createInterface({ input: proc.stdout, crlfDelay: Infinity })
-      this.rl.on('line', (line) => {
-        const resolver = this.pending.shift()
-        if (!resolver) return
-        try {
-          resolver.resolve(JSON.parse(line))
-        } catch (e) {
-          resolver.reject(e instanceof Error ? e : new Error(String(e)))
-        }
-      })
+      this.rl.on('line', (line) => this.onLine(line))
     }
   }
 
-  request(message: unknown): Promise<unknown> {
+  request<T = unknown>(message: object, onProgress?: ProgressCallback): Promise<T> {
     const proc = this.process
     const stdin = proc?.stdin
     if (!proc || !stdin || !stdin.writable) {
       return Promise.reject(new Error('CoreBridge not connected'))
     }
-    return new Promise((resolve, reject) => {
-      this.pending.push({ resolve, reject })
-      stdin.write(JSON.stringify(message) + '\n')
+    const id = this.nextId++
+    return new Promise<T>((resolve, reject) => {
+      this.pending.set(id, {
+        resolve: resolve as (v: unknown) => void,
+        reject,
+        onProgress
+      })
+      const envelope = { id, ...message }
+      stdin.write(JSON.stringify(envelope) + '\n')
     })
   }
 
@@ -62,5 +69,34 @@ export class CoreBridge {
     }
     this.process = null
     this.rl = null
+  }
+
+  private onLine(line: string): void {
+    let parsed: Record<string, unknown>
+    try {
+      parsed = JSON.parse(line) as Record<string, unknown>
+    } catch {
+      // Malformed line — drop. (forge_core only emits well-formed JSON.)
+      return
+    }
+
+    const id = parsed.id
+    if (typeof id !== 'number') return
+    const handler = this.pending.get(id)
+    if (!handler) return
+
+    if (typeof parsed.event === 'string') {
+      // Mid-stream progress event.
+      handler.onProgress?.(parsed as ProgressEvent)
+      return
+    }
+
+    // Final response: settle the promise and clear the entry.
+    this.pending.delete(id)
+    if (typeof parsed.error === 'string') {
+      handler.reject(new Error(parsed.error))
+    } else {
+      handler.resolve(parsed.result)
+    }
   }
 }

@@ -17,7 +17,7 @@ const nlohmann::json* require_string(const nlohmann::json& req, const std::strin
 
 }
 
-nlohmann::json dispatch(const nlohmann::json& request) {
+nlohmann::json dispatch(const nlohmann::json& request, EmitEvent emit_event) {
     if (!request.contains("op") || !request.at("op").is_string()) {
         return {{"error", "missing or invalid op"}};
     }
@@ -42,10 +42,19 @@ nlohmann::json dispatch(const nlohmann::json& request) {
         if (!url || !sha || !dir) {
             return {{"error", "install requires string fields 'url', 'expected_sha256', 'install_dir'"}};
         }
+
+        ProgressCallback on_progress;
+        if (emit_event) {
+            on_progress = [&emit_event](int percent) {
+                emit_event({{"event", "progress"}, {"phase", "download"}, {"percent", percent}});
+            };
+        }
+
         const auto result = install(
             url->get<std::string>(),
             sha->get<std::string>(),
-            std::filesystem::path(dir->get<std::string>()));
+            std::filesystem::path(dir->get<std::string>()),
+            on_progress);
         if (!result) {
             return {{"error", result.error()}};
         }

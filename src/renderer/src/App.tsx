@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LoginView } from './views/LoginView'
 import { Shell } from './views/Shell'
 import { WelcomeView } from './views/WelcomeView'
@@ -7,7 +7,7 @@ import type { Game } from '../../shared/types'
 
 export type GameInstallStatus =
   | { kind: 'idle' }
-  | { kind: 'installing' }
+  | { kind: 'installing'; percent?: number }
   | { kind: 'installed'; executable_path: string; last_launch_error?: string }
   | { kind: 'uninstalling' }
   | { kind: 'error'; message: string }
@@ -38,6 +38,27 @@ function App(): React.JSX.Element {
       }
     })
   }
+
+  useEffect(() => {
+    return window.api.onInstallProgress((gameId, percent) => {
+      setState((prev) => {
+        if (prev.view === 'login') return prev
+        const current = prev.session.installs[gameId]
+        // Only apply progress while we're in the installing state for that game.
+        if (!current || current.kind !== 'installing') return prev
+        return {
+          ...prev,
+          session: {
+            ...prev.session,
+            installs: {
+              ...prev.session.installs,
+              [gameId]: { kind: 'installing', percent }
+            }
+          }
+        }
+      })
+    })
+  }, [])
 
   const signIn = async (currentUser: string): Promise<void> => {
     const [manifest, installed] = await Promise.all([
@@ -74,7 +95,7 @@ function App(): React.JSX.Element {
   }
 
   const installGame = async (gameId: string): Promise<void> => {
-    updateInstallStatus(gameId, { kind: 'installing' })
+    updateInstallStatus(gameId, { kind: 'installing', percent: 0 })
     const result = await window.api.install(gameId)
     if (result.ok) {
       updateInstallStatus(gameId, {

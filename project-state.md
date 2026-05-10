@@ -1,7 +1,7 @@
 # Forge — Project State
 
 **Last updated:** May 16, 2026
-**Status:** 🟢 Phase 1 demo milestone reached — log in → install a stub → launch → exit code surfaced in the UI, all green end-to-end on Windows CI. Remaining Phase 1 polish: 4.5b-progress (button-as-progress percentage via a protocol-ID + event-message refactor).
+**Status:** 🟢 Phase 1 complete — log in → install (with real percent progress) → launch (exit code surfaced) → uninstall (two-click confirm). All green on Windows CI. Phase 2 next: README, demo GIF, architecture diagram, release artifact on tag, one Playwright E2E.
 
 ---
 
@@ -99,7 +99,7 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] (4.5a) C++ install orchestrator (download + verify + extract) wired to IPC; install state persisted to a JSON file under `app.getPath('userData')` and reloaded on startup; Install → Play button transition works (Install button shows "Installing…" text — real progress percentage deferred to 4.5b-progress)
 - [x] (4.5b-uninstall) Uninstall button below Play with two-click inline confirm; main-process `fs.rm` of `install_dir` + remove the record from persisted state
 - [x] Build & host the stub binaries: `stubs/` CMake sub-project produces `forge-stub-success` and `forge-stub-crash`; `stubs/package.ps1` builds + zips them; published as zips on this repo's `stubs-1.0.0` release (kept artifacts in the same repo for v0.1 — separate `forge-catalog` repo deferred); real SHA-256 values in `manifest.json`. Bundled in the same step: launch errors (`last_launch_error` on `'installed'` status) surfaced in the right pane below Play.
-- [ ] (4.5b-progress) Protocol IDs + event messages on the IPC bridge so install can stream progress; button-as-progress with real percentage during install
+- [x] (4.5b-progress) Protocol IDs + event messages on the IPC bridge so install can stream progress; button-as-progress with real percentage during install (every request now carries an `id`; final responses come back wrapped as `{id, result}` or `{id, error}`; mid-stream events are `{id, event:"progress", percent}`. Bridge correlates by id, exposes `request(msg, onProgress?)`. Renderer subscribes to `onInstallProgress` from preload; install button fills via a CSS linear-gradient with `--progress-fill` set inline.)
 - [x] **Milestone: log in, install a sample game, launch it from the UI** — demo-ready, all tests green (ctest 20/20, vitest 33/33), CI green on `windows-latest`
 
 ### Phase 2 — Polish & ship (≈1 week)

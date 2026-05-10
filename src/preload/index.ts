@@ -8,6 +8,8 @@ type UninstallResult = { ok: true } | { ok: false; error: string }
 
 type LaunchResult = { ok: true; exit_code: number } | { ok: false; error: string }
 
+type InstallProgressListener = (gameId: string, percent: number) => void
+
 const api = {
   request: (message: unknown): Promise<unknown> => ipcRenderer.invoke('forge:request', message),
   catalog: (): Promise<Manifest> => ipcRenderer.invoke('forge:catalog'),
@@ -15,7 +17,16 @@ const api = {
   install: (gameId: string): Promise<InstallResult> => ipcRenderer.invoke('forge:install', gameId),
   uninstall: (gameId: string): Promise<UninstallResult> =>
     ipcRenderer.invoke('forge:uninstall', gameId),
-  launch: (gameId: string): Promise<LaunchResult> => ipcRenderer.invoke('forge:launch', gameId)
+  launch: (gameId: string): Promise<LaunchResult> => ipcRenderer.invoke('forge:launch', gameId),
+  onInstallProgress: (listener: InstallProgressListener): (() => void) => {
+    const handler = (_event: unknown, payload: { gameId: string; percent: number }): void => {
+      listener(payload.gameId, payload.percent)
+    }
+    ipcRenderer.on('forge:install_progress', handler)
+    return () => {
+      ipcRenderer.removeListener('forge:install_progress', handler)
+    }
+  }
 }
 
 if (process.contextIsolated) {

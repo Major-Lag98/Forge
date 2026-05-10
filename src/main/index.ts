@@ -64,20 +64,30 @@ app.whenReady().then(() => {
   ipcMain.handle('forge:catalog', () => manifest as Manifest)
   ipcMain.handle('forge:installed_games', () => loadInstallRecords())
 
-  ipcMain.handle('forge:install', async (_event, gameId: string) => {
+  ipcMain.handle('forge:install', async (event, gameId: string) => {
     const game = (manifest as Manifest).games.find((g) => g.id === gameId)
     if (!game) return { ok: false, error: `unknown game id: ${gameId}` } as const
 
     const installDir = join(app.getPath('userData'), 'installs', gameId)
-    const response = (await coreBridge.request({
-      op: 'install',
-      url: game.url,
-      expected_sha256: game.sha256,
-      install_dir: installDir
-    })) as Record<string, unknown>
-
-    if (!response || response.installed !== true) {
-      const err = typeof response?.error === 'string' ? response.error : 'install failed'
+    try {
+      await coreBridge.request(
+        {
+          op: 'install',
+          url: game.url,
+          expected_sha256: game.sha256,
+          install_dir: installDir
+        },
+        (progress) => {
+          if (progress.event === 'progress' && typeof progress.percent === 'number') {
+            event.sender.send('forge:install_progress', {
+              gameId,
+              percent: progress.percent
+            })
+          }
+        }
+      )
+    } catch (e) {
+      const err = e instanceof Error ? e.message : String(e)
       return { ok: false, error: err } as const
     }
 
@@ -112,16 +122,19 @@ app.whenReady().then(() => {
     const record = records.find((r) => r.id === gameId)
     if (!record) return { ok: false, error: `not installed: ${gameId}` } as const
 
-    const response = (await coreBridge.request({
-      op: 'launch',
-      executable: record.executable_path
-    })) as Record<string, unknown>
-
-    if (response && typeof response.exit_code === 'number') {
-      return { ok: true, exit_code: response.exit_code } as const
+    try {
+      const response = (await coreBridge.request({
+        op: 'launch',
+        executable: record.executable_path
+      })) as Record<string, unknown>
+      if (typeof response.exit_code === 'number') {
+        return { ok: true, exit_code: response.exit_code } as const
+      }
+      return { ok: false, error: 'launch returned unexpected payload' } as const
+    } catch (e) {
+      const err = e instanceof Error ? e.message : String(e)
+      return { ok: false, error: err } as const
     }
-    const err = typeof response?.error === 'string' ? response.error : 'launch failed'
-    return { ok: false, error: err } as const
   })
 
   createWindow()
