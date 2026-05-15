@@ -36,24 +36,24 @@ jobs:
         with:
           arch: x64
 
-      - name: Configure CMake
-        run: cmake --preset ninja
+      - name: Configure CMake (Release)
+        run: cmake --preset ninja-release
 
-      - name: Build C++ core
-        run: cmake --build --preset ninja
+      - name: Build C++ core (Release)
+        run: cmake --build --preset ninja-release
 
-      - name: Run C++ tests
-        run: ctest --preset ninja
+      - name: Run C++ tests (Release)
+        run: ctest --preset ninja-release
 
       - name: Run JS tests
         env:
-          FORGE_CORE_PATH: ${{ github.workspace }}\core\build\ninja\core\forge_core.exe
-          FORGE_HELPER_ZERO_PATH: ${{ github.workspace }}\core\build\ninja\core\tests\forge_helper_zero.exe
+          FORGE_CORE_PATH: ${{ github.workspace }}\core\build\ninja-release\core\forge_core.exe
+          FORGE_HELPER_ZERO_PATH: ${{ github.workspace }}\core\build\ninja-release\core\tests\forge_helper_zero.exe
         run: npm run test:js
 
       - name: Package Windows installer
         env:
-          FORGE_CORE_PATH: ${{ github.workspace }}\core\build\ninja\core\forge_core.exe
+          FORGE_CORE_PATH: ${{ github.workspace }}\core\build\ninja-release\core\forge_core.exe
         run: npm run build:win
 
       - name: Publish GitHub Release

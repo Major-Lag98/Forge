@@ -12,8 +12,9 @@ files:
 asarUnpack:
   - resources/**
 extraResources:
-  - from: staging/forge_core.exe
-    to: forge_core.exe
+  - from: staging
+    to: .
+    filter: ['**/*']
 win:
   executableName: forge
 nsis:
