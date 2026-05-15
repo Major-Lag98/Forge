@@ -19,10 +19,10 @@ describe('installs persistence', () => {
   })
 
   const sample: InstalledGame = {
-    id: 'mindustry',
-    version: '8.0',
-    install_dir: 'C:\\fake\\installs\\mindustry',
-    executable_path: 'C:\\fake\\installs\\mindustry\\Mindustry.exe',
+    id: 'sample-game',
+    version: '1.0.0',
+    install_dir: 'C:\\fake\\installs\\sample-game',
+    executable_path: 'C:\\fake\\installs\\sample-game\\sample-game.exe',
     installed_at: '2026-01-01T00:00:00.000Z'
   }
 
@@ -45,7 +45,7 @@ describe('installs persistence', () => {
 
   it('replaces an existing record with the same id', async () => {
     await saveInstallRecord(sample, filePath)
-    const updated: InstalledGame = { ...sample, version: '9.0' }
+    const updated: InstalledGame = { ...sample, version: '2.0.0' }
     await saveInstallRecord(updated, filePath)
     const records = await loadInstallRecords(filePath)
     expect(records).toEqual([updated])
@@ -53,21 +53,21 @@ describe('installs persistence', () => {
 
   it('keeps records with different ids alongside each other', async () => {
     await saveInstallRecord(sample, filePath)
-    const other: InstalledGame = { ...sample, id: 'forge-stub-success' }
+    const other: InstalledGame = { ...sample, id: 'other-game' }
     await saveInstallRecord(other, filePath)
     const records = await loadInstallRecords(filePath)
     expect(records).toHaveLength(2)
     const ids = records.map((r) => r.id).sort()
-    expect(ids).toEqual(['forge-stub-success', 'mindustry'])
+    expect(ids).toEqual(['other-game', 'sample-game'])
   })
 
   it('removes a record by id and preserves others', async () => {
     const a = sample
-    const b: InstalledGame = { ...sample, id: 'forge-stub-success' }
+    const b: InstalledGame = { ...sample, id: 'other-game' }
     await saveInstallRecord(a, filePath)
     await saveInstallRecord(b, filePath)
 
-    await removeInstallRecord('mindustry', filePath)
+    await removeInstallRecord('sample-game', filePath)
 
     const records = await loadInstallRecords(filePath)
     expect(records).toEqual([b])

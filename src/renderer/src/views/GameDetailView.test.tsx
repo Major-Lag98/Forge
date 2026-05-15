@@ -6,15 +6,15 @@ import { GameDetailView } from './GameDetailView'
 import type { Game } from '../../../shared/types'
 
 const game: Game = {
-  id: 'mindustry',
-  name: 'Mindustry',
-  version: '8.0',
-  description: 'A factory game.',
+  id: 'sample-game',
+  name: 'Sample Game',
+  version: '1.0.0',
+  description: 'A sample game.',
   platform: 'windows-x64',
-  url: 'https://example.com/mindustry.zip',
+  url: 'https://example.com/sample-game.zip',
   sha256: '0'.repeat(64),
   size_bytes: 100,
-  executable: 'Mindustry.exe'
+  executable: 'sample-game.exe'
 }
 
 const noop = (): void => {}
@@ -30,7 +30,7 @@ describe('GameDetailView', () => {
         onUninstall={noop}
       />
     )
-    expect(screen.queryByRole('heading', { name: 'Mindustry' })).not.toBeNull()
+    expect(screen.queryByRole('heading', { name: 'Sample Game' })).not.toBeNull()
   })
 
   it('renders the description text', () => {
@@ -43,7 +43,7 @@ describe('GameDetailView', () => {
         onUninstall={noop}
       />
     )
-    expect(screen.queryByText('A factory game.')).not.toBeNull()
+    expect(screen.queryByText('A sample game.')).not.toBeNull()
   })
 
   it('shows an Install button when idle and fires onInstall on click', async () => {

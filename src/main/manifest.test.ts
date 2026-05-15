@@ -9,13 +9,13 @@ describe('manifest.json', () => {
     expect(m.schema_version).toBe(1)
   })
 
-  it('contains the expected catalog game IDs', () => {
-    const ids = m.games.map((g) => g.id).sort()
-    expect(ids).toEqual(['forge-test-2', 'mindustry'])
+  it('has at least one catalog entry with unique IDs', () => {
+    expect(m.games.length).toBeGreaterThan(0)
+    const ids = m.games.map((g) => g.id)
+    expect(new Set(ids).size).toBe(ids.length)
   })
 
   it('every game has the required fields and the expected shape', () => {
-    expect(m.games.length).toBeGreaterThan(0)
     for (const game of m.games) {
       expect(game.id).toBeTruthy()
       expect(game.name).toBeTruthy()

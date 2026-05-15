@@ -4,8 +4,8 @@
   "configurePresets": [
     {
       "name": "default",
-      "displayName": "Default (VS 2026, x64, vcpkg)",
-      "generator": "Visual Studio 18 2026",
+      "displayName": "Default (VS 2022, x64, vcpkg)",
+      "generator": "Visual Studio 17 2022",
       "architecture": { "value": "x64", "strategy": "set" },
       "binaryDir": "${sourceDir}/core/build/default",
       "toolchainFile": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"

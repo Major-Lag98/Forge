@@ -1,7 +1,7 @@
 # Forge — Project State
 
-**Last updated:** May 16, 2026
-**Status:** 🟢 Phase 1 complete — log in → install (with real percent progress) → launch (exit code surfaced) → uninstall (two-click confirm). All green on Windows CI. Phase 2 next: README, demo GIF, architecture diagram, release artifact on tag, one Playwright E2E.
+**Last updated:** May 14, 2026
+**Status:** 🟡 Phase 2 in progress — Phase 1 shipped (log in → install with real percent progress → launch with exit code surfaced → uninstall with two-click confirm, all green on Windows CI). Phase 2 starting with a cleanup sweep before the polish work (README, demo GIF, architecture diagram, release artifact on tag, one Playwright E2E).
 
 ---
 
@@ -86,10 +86,10 @@ Three short phases. Goal is a working demo, not a flagship project.
 
 ### Phase 0 — Bootstrap (≈1 weekend)
 - [x] Repo scaffolding: Electron + Vite + React + TypeScript (electron-vite + electron-builder, target Windows)
-- [x] CMake + vcpkg setup for the C++ core; "hello" binary builds (vcpkg as git submodule, manifest mode; CMakePresets pinned to VS 2026 + x64; `forge_core.exe` prints a JSON via nlohmann-json)
+- [x] CMake + vcpkg setup for the C++ core; "hello" binary builds (vcpkg as git submodule, manifest mode; CMakePresets pinned to VS 2022 + x64 for the local default — `Visual Studio 17 2022` generator; `forge_core.exe` prints a JSON via nlohmann-json)
 - [x] **GoogleTest + Vitest wired into the build with one trivial passing test each** — test infra runs in CI before any real code lands (`npm test` runs both; CTest preset for the C++ side, Vitest for TS; ESLint ignores extended for `vcpkg/` and `core/build/`)
 - [x] Electron `child_process` spawns the C++ core; one round-trip JSON message renderer ↔ main ↔ core, exercised by an integration test (line-delimited JSON over stdin/stdout, `{"op":"ping"}` → `{"pong":true}`; `CoreBridge` class in main; `window.api.request` in renderer; gtest unit covers `dispatch`, vitest integration spawns the real binary)
-- [x] GitHub Actions: lint, format, build, **run tests** on the chosen target OS (`.github/workflows/ci.yml`, runs on `windows-latest`, Node 22, vcvars via `ilammy/msvc-dev-cmd`. Uses a separate `ninja` CMake preset so the user's local `default` preset (VS 2026) stays untouched. Vitest's bridge test resolves the binary via `FORGE_CORE_PATH` env var with the local default as fallback. Verified locally end-to-end; first GitHub run pending an actual push.)
+- [x] GitHub Actions: lint, format, build, **run tests** on the chosen target OS (`.github/workflows/ci.yml`, runs on `windows-latest`, Node 22, vcvars via `ilammy/msvc-dev-cmd`. Uses a separate `ninja` CMake preset so the local `default` preset (VS 2022) stays untouched. Vitest's bridge test resolves the binary via `FORGE_CORE_PATH` env var with the local default as fallback. Verified locally end-to-end; first GitHub run pending an actual push.)
 
 ### Phase 1 — Core flow (≈1–2 weeks)
 - [x] Stub login screen → fake session
@@ -103,6 +103,7 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] **Milestone: log in, install a sample game, launch it from the UI** — demo-ready, all tests green (ctest 20/20, vitest 33/33), CI green on `windows-latest`
 
 ### Phase 2 — Polish & ship (≈1 week)
+- [ ] Cleanup sweep: drop the `stubs/` sub-project (artifacts on the GitHub release stay), fix the stale `manifest.test.ts` ID assertion, rewrite §9 of this doc to point at the live catalog, and clear out any other lingering placeholder/debug references in tests and docs
 - [ ] One Playwright E2E test: launch app, install game, verify it runs
 - [ ] Fill in any test gaps surfaced during Phase 1
 - [ ] CI publishes a release artifact on tagged commits
@@ -135,55 +136,27 @@ Three short phases. Goal is a working demo, not a flagship project.
 
 ## 9. Sample catalog
 
-Three entries for v0.1: one real game for the demo, plus two stubs for tests and to make the catalog feel populated.
+The live catalog lives at [`src/main/manifest.json`](./src/main/manifest.json) and is bundled with the app. Phase 1 used a pair of `forge-stub-*` test binaries while the install flow was being built; both were dropped at the start of Phase 2 once real Unity / Unreal builds replaced them. The current entries are four self-authored sample games (two Unity, two Unreal) hosted as zips on GitHub Releases under separate per-game repos. The `executable` field is the path inside the extracted zip — the C++ core uses it for the launch step.
 
-### Games
+Schema (unchanged since Phase 1):
 
-| ID | What | Source | Why |
-|---|---|---|---|
-| `mindustry` | [Mindustry](https://mindustrygame.github.io/) v8 — GPLv3 factory / tower defense game | Mirror the official build to your own GitHub Release | Demo headliner. Recognizable, ~150 MB, downloads in a reasonable time, looks great in a GIF. GPLv3 redistribution is fine — include the license file in the mirror. Re-verify before mirroring. |
-| `forge-stub-success` | A 30-line program that opens a window, prints "Hello from Forge", waits, exits 0 | Build it yourself; ~kilobytes | Fast, deterministic E2E test of the happy-path launch flow. |
-| `forge-stub-crash` | Same as above, but exits with code 1 after a moment | Build it yourself | Tests the C++ core's error-surfacing path. Most launcher bugs hide in failure modes — this stub is the one you'll thank yourself for later. |
-
-### Hosting
-
-- **GitHub Releases** on a separate `forge-catalog` repo. Stable URLs, free, supports SHA-256 verification naturally.
-- One release per (game, version, platform).
-- The static manifest JSON also lives in this repo (or as a Pages-served file).
-
-### Sample manifest entry
-
-```json
+```jsonc
 {
   "schema_version": 1,
   "games": [
     {
-      "id": "mindustry",
-      "name": "Mindustry",
-      "version": "8.0",
-      "description": "Open-source factory / tower defense game.",
-      "platform": "macos-arm64",
-      "url": "https://github.com/<you>/forge-catalog/releases/download/mindustry-8.0/mindustry-macos-arm64.zip",
-      "sha256": "<fill in after mirroring>",
-      "size_bytes": 152000000,
-      "executable": "Mindustry.app/Contents/MacOS/Mindustry"
-    },
-    {
-      "id": "forge-stub-success",
-      "name": "Forge Stub (Success)",
+      "id": "...",            // stable slug
+      "name": "...",          // display name
       "version": "1.0.0",
-      "description": "Test stub — exits 0.",
-      "platform": "macos-arm64",
-      "url": "https://github.com/<you>/forge-catalog/releases/download/stubs-1.0.0/forge-stub-success-macos-arm64.zip",
-      "sha256": "<fill in after building>",
-      "size_bytes": 50000,
-      "executable": "forge-stub-success"
+      "description": "...",
+      "platform": "windows-x64",
+      "url": "https://...zip",
+      "sha256": "<64-char hex>",
+      "size_bytes": 0,
+      "executable": "path/inside/zip.exe"
     }
   ]
 }
 ```
 
-### Notes
-- The `executable` field is the path inside the extracted zip — the C++ core uses it for the launch step.
-- Build the stubs first, before the launcher itself. Phase 1's tests need them to exist.
-- One stub per platform, hosted as a separate zip per platform — keeps the manifest schema simple (no nested platform map).
+Adding a new game today: build the zip, hash it, upload to a GitHub Release, paste the entry into `manifest.json`, run `npm test` to confirm the shape check passes, commit. (A remote catalog endpoint is a stretch item — see §6.)

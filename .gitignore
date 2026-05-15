@@ -26,9 +26,6 @@ compile_commands.json
 # vcpkg
 vcpkg_installed/
 
-# Stub release artifacts (built locally, hosted on GitHub Releases)
-stubs/dist/
-
 # IDE / OS
 .vs/
 .idea/

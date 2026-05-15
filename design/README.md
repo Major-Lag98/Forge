@@ -66,7 +66,7 @@ These resolve the open questions in the per-screen sections above. Implementatio
 
 ### Component patterns
 
-- **Catalog rail tiles:** vertical stack. Icon-when-available, fallback to a numbered/text tile for games without an icon (the stub games). Selected tile shown via shaded fill + a ~2 px accent-coloured border. No pop-out animation.
+- **Catalog rail tiles:** vertical stack. Icon-when-available, fallback to a numbered/text tile for games without an icon. Selected tile shown via shaded fill + a ~2 px accent-coloured border. No pop-out animation.
 - **Install progress = button:** the primary action button itself fills with progress during installation, with the percentage as its label. One element, one place to look.
 - **Uninstall button:** smaller, sits below Play on installed games. First click transforms it inline to "Confirm uninstall?". Second click triggers the actual uninstall. No modal.
 - **Error UI:** stays in the right pane next to the primary action button. Persists per selected game (switching to a different game doesn't clear the error on the first). Cleared when the user retries.
