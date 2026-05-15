@@ -103,10 +103,10 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] **Milestone: log in, install a sample game, launch it from the UI** — demo-ready, all tests green (ctest 20/20, vitest 33/33), CI green on `windows-latest`
 
 ### Phase 2 — Polish & ship (≈1 week)
-- [ ] Cleanup sweep: drop the `stubs/` sub-project (artifacts on the GitHub release stay), fix the stale `manifest.test.ts` ID assertion, rewrite §9 of this doc to point at the live catalog, and clear out any other lingering placeholder/debug references in tests and docs
+- [x] Cleanup sweep: dropped the `stubs/` sub-project (artifacts on the GitHub `stubs-1.0.0` release left alone), de-brittled `manifest.test.ts`, rewrote §9 of this doc to point at the live catalog, neutralised dangling `mindustry`/`forge-stub-success` test fixtures, switched the local default CMake preset to VS 2022 to match the installed toolchain
 - [ ] One Playwright E2E test: launch app, install game, verify it runs
 - [ ] Fill in any test gaps surfaced during Phase 1
-- [ ] CI publishes a release artifact on tagged commits
+- [ ] CI publishes a release artifact on tagged commits (in progress — `scripts/stage-core.mjs` copies the built `forge_core.exe` into `staging/`, `electron-builder.yml` bundles it via `extraResources`, `src/main/index.ts` resolves `corePath` from `process.resourcesPath` when `app.isPackaged`, `.github/workflows/release.yml` triggers on `v*` tags and uploads the NSIS installer to a GitHub Release. Local installer build blocked by Windows-without-Developer-Mode symlink permissions during `winCodeSign` extraction; validation deferred to CI via a throwaway `v0.1.0-rc1` tag.)
 - [ ] Demo GIF, architecture diagram (a real SVG, not ASCII)
 - [ ] README finalized
 

@@ -12,6 +12,9 @@ dist-electron/
 # electron-builder release artifacts
 release/
 
+# Staged forge_core.exe for packaging (built locally; produced by scripts/stage-core.mjs)
+staging/
+
 # TypeScript incremental
 *.tsbuildinfo
 

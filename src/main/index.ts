@@ -11,7 +11,9 @@ import { loadInstallRecords, removeInstallRecord, saveInstallRecord } from './in
 const coreBridge = new CoreBridge()
 const corePath =
   process.env.FORGE_CORE_PATH ??
-  resolve(process.cwd(), 'core/build/default/core/Debug/forge_core.exe')
+  (app.isPackaged
+    ? join(process.resourcesPath, 'forge_core.exe')
+    : resolve(process.cwd(), 'core/build/default/core/Debug/forge_core.exe'))
 
 function createWindow(): void {
   // Create the browser window.
