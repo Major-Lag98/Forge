@@ -24,7 +24,14 @@ export class CoreBridge {
     if (this.process) {
       throw new Error('CoreBridge already initialized')
     }
-    const proc = spawn(executablePath, [], { stdio: ['pipe', 'pipe', 'inherit'] })
+    // windowsHide: forge_core.exe is a console-subsystem binary. When the
+    // packaged (GUI) Electron parent spawns it, Windows allocates a fresh
+    // console window that stays visible. The user closing that window
+    // sends CTRL_CLOSE_EVENT to the child and kills it.
+    const proc = spawn(executablePath, [], {
+      stdio: ['pipe', 'pipe', 'inherit'],
+      windowsHide: true
+    })
     this.process = proc
 
     proc.on('exit', (code, signal) => {
