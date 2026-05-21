@@ -1,7 +1,7 @@
 # Forge — Project State
 
-**Last updated:** May 14, 2026
-**Status:** 🟡 Phase 2 in progress — Phase 1 shipped (log in → install with real percent progress → launch with exit code surfaced → uninstall with two-click confirm, all green on Windows CI). Phase 2 starting with a cleanup sweep before the polish work (README, demo GIF, architecture diagram, release artifact on tag, one Playwright E2E).
+**Last updated:** May 20, 2026
+**Status:** 🟡 Phase 2 in progress — cleanup sweep + release artifact on tag (forge_core.exe + DLLs bundled into the NSIS installer, validated via `v0.1.0-rc3`) done. Remote catalog landed (manifest now fetched from a separate `Forge-Manifest` repo at startup, with manual refresh button + hard-fail UI). Remaining: Playwright E2E, demo GIF + architecture SVG, README finalize.
 
 ---
 
@@ -106,7 +106,8 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] Cleanup sweep: dropped the `stubs/` sub-project (artifacts on the GitHub `stubs-1.0.0` release left alone), de-brittled `manifest.test.ts`, rewrote §9 of this doc to point at the live catalog, neutralised dangling `mindustry`/`forge-stub-success` test fixtures, switched the local default CMake preset to VS 2022 to match the installed toolchain
 - [ ] One Playwright E2E test: launch app, install game, verify it runs
 - [ ] Fill in any test gaps surfaced during Phase 1
-- [ ] CI publishes a release artifact on tagged commits (in progress — `scripts/stage-core.mjs` copies the built `forge_core.exe` into `staging/`, `electron-builder.yml` bundles it via `extraResources`, `src/main/index.ts` resolves `corePath` from `process.resourcesPath` when `app.isPackaged`, `.github/workflows/release.yml` triggers on `v*` tags and uploads the NSIS installer to a GitHub Release. Local installer build blocked by Windows-without-Developer-Mode symlink permissions during `winCodeSign` extraction; validation deferred to CI via a throwaway `v0.1.0-rc1` tag.)
+- [x] CI publishes a release artifact on tagged commits (`.github/workflows/release.yml` triggers on `v*` tags, builds the C++ core via the new `ninja-release` preset, runs gtest + vitest, packages an NSIS installer via `npm run build:win`, uploads to GitHub Releases. `scripts/stage-core.mjs` copies `forge_core.exe` + its vcpkg runtime DLLs to `staging/`, `electron-builder.yml` bundles them via `extraResources`, `src/main/index.ts` resolves `corePath` from `process.resourcesPath` when `app.isPackaged`, and `core-bridge.ts` spawns with `windowsHide: true` so the console-subsystem child doesn't pop a CMD window in the packaged app. Validated end-to-end via `v0.1.0-rc3`.)
+- [x] Remote catalog: manifest is fetched from a separate `Forge-Manifest` GitHub repo at startup; manual refresh button on the catalog rail; hard-fail UI (loading / error-with-retry) when the network is unreachable. `src/main/catalog.ts` does the fetch + JSON schema validation, `App.tsx` owns the `CatalogState` machine, `FORGE_CATALOG_URL` env var overrides the default URL for offline dev. Bundled `src/main/manifest.json` retired in the same commit. (Promoted from stretch.)
 - [ ] Demo GIF, architecture diagram (a real SVG, not ASCII)
 - [ ] README finalized
 
@@ -136,7 +137,7 @@ Three short phases. Goal is a working demo, not a flagship project.
 
 ## 9. Sample catalog
 
-The live catalog lives at [`src/main/manifest.json`](./src/main/manifest.json) and is bundled with the app. Phase 1 used a pair of `forge-stub-*` test binaries while the install flow was being built; both were dropped at the start of Phase 2 once real Unity / Unreal builds replaced them. The current entries are four self-authored sample games (two Unity, two Unreal) hosted as zips on GitHub Releases under separate per-game repos. The `executable` field is the path inside the extracted zip — the C++ core uses it for the launch step.
+The live catalog lives in a separate repo, [Forge-Manifest](https://github.com/Major-Lag98/Forge-Manifest), at `manifest.json` on `main`. The client fetches it at startup from the raw URL `https://raw.githubusercontent.com/Major-Lag98/Forge-Manifest/refs/heads/main/manifest.json` (overridable via the `FORGE_CATALOG_URL` env var for offline dev). The catalog entries are self-authored sample games (Unity + Unreal builds) hosted as zips on GitHub Releases under separate per-game repos. The `executable` field is the path inside the extracted zip — the C++ core uses it for the launch step.
 
 Schema (unchanged since Phase 1):
 
@@ -159,4 +160,4 @@ Schema (unchanged since Phase 1):
 }
 ```
 
-Adding a new game today: build the zip, hash it, upload to a GitHub Release, paste the entry into `manifest.json`, run `npm test` to confirm the shape check passes, commit. (A remote catalog endpoint is a stretch item — see §6.)
+Adding a new game today: build the zip, hash it, upload to a GitHub Release, paste the entry into the Forge-Manifest repo's `manifest.json`, commit + push. Already-running clients see the new entry on the next refresh-button click or app restart — no Forge client release needed.

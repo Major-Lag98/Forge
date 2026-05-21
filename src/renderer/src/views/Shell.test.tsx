@@ -35,7 +35,15 @@ const noop = (): void => {}
 describe('Shell', () => {
   it('renders one tile button per game with the game name as accessible label', () => {
     render(
-      <Shell games={games} selectedGameId={null} onSelectGame={noop} onHome={noop} onSignOut={noop}>
+      <Shell
+        games={games}
+        selectedGameId={null}
+        onSelectGame={noop}
+        onHome={noop}
+        onSignOut={noop}
+        onRefreshCatalog={noop}
+        catalogLoading={false}
+      >
         <div>main</div>
       </Shell>
     )
@@ -53,6 +61,8 @@ describe('Shell', () => {
         onSelectGame={onSelectGame}
         onHome={noop}
         onSignOut={noop}
+        onRefreshCatalog={noop}
+        catalogLoading={false}
       >
         <div>main</div>
       </Shell>
@@ -63,7 +73,15 @@ describe('Shell', () => {
 
   it('marks the selected tile with the selected class', () => {
     render(
-      <Shell games={games} selectedGameId="a" onSelectGame={noop} onHome={noop} onSignOut={noop}>
+      <Shell
+        games={games}
+        selectedGameId="a"
+        onSelectGame={noop}
+        onHome={noop}
+        onSignOut={noop}
+        onRefreshCatalog={noop}
+        catalogLoading={false}
+      >
         <div>main</div>
       </Shell>
     )
@@ -77,7 +95,15 @@ describe('Shell', () => {
     const onHome = vi.fn()
     const user = userEvent.setup()
     render(
-      <Shell games={[]} selectedGameId={null} onSelectGame={noop} onHome={onHome} onSignOut={noop}>
+      <Shell
+        games={[]}
+        selectedGameId={null}
+        onSelectGame={noop}
+        onHome={onHome}
+        onSignOut={noop}
+        onRefreshCatalog={noop}
+        catalogLoading={false}
+      >
         <div>main</div>
       </Shell>
     )
@@ -95,11 +121,51 @@ describe('Shell', () => {
         onSelectGame={noop}
         onHome={noop}
         onSignOut={onSignOut}
+        onRefreshCatalog={noop}
+        catalogLoading={false}
       >
         <div>main</div>
       </Shell>
     )
     await user.click(screen.getByRole('button', { name: /sign out/i }))
     expect(onSignOut).toHaveBeenCalled()
+  })
+
+  it('fires onRefreshCatalog when the refresh button is clicked', async () => {
+    const onRefreshCatalog = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <Shell
+        games={[]}
+        selectedGameId={null}
+        onSelectGame={noop}
+        onHome={noop}
+        onSignOut={noop}
+        onRefreshCatalog={onRefreshCatalog}
+        catalogLoading={false}
+      >
+        <div>main</div>
+      </Shell>
+    )
+    await user.click(screen.getByRole('button', { name: /refresh catalog/i }))
+    expect(onRefreshCatalog).toHaveBeenCalled()
+  })
+
+  it('disables the refresh button while the catalog is loading', () => {
+    render(
+      <Shell
+        games={[]}
+        selectedGameId={null}
+        onSelectGame={noop}
+        onHome={noop}
+        onSignOut={noop}
+        onRefreshCatalog={noop}
+        catalogLoading={true}
+      >
+        <div>main</div>
+      </Shell>
+    )
+    const refresh = screen.getByRole('button', { name: /refresh catalog/i })
+    expect(refresh.hasAttribute('disabled')).toBe(true)
   })
 })

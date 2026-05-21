@@ -7,6 +7,8 @@ interface ShellProps {
   onSelectGame: (gameId: string) => void
   onHome: () => void
   onSignOut: () => void
+  onRefreshCatalog: () => void
+  catalogLoading: boolean
   children: ReactNode
 }
 
@@ -16,6 +18,8 @@ export function Shell({
   onSelectGame,
   onHome,
   onSignOut,
+  onRefreshCatalog,
+  catalogLoading,
   children
 }: ShellProps): React.JSX.Element {
   return (
@@ -23,6 +27,16 @@ export function Shell({
       <aside className="rail">
         <button type="button" className="rail-home" onClick={onHome} aria-label="Home">
           F
+        </button>
+        <button
+          type="button"
+          className={`rail-refresh${catalogLoading ? ' rail-refresh-loading' : ''}`}
+          onClick={onRefreshCatalog}
+          aria-label="Refresh catalog"
+          title="Refresh catalog"
+          disabled={catalogLoading}
+        >
+          ↻
         </button>
         <div className="rail-games">
           {games.map((game, idx) => (

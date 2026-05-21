@@ -3,7 +3,7 @@ import { join, resolve } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { CoreBridge } from './core-bridge'
-import manifest from './manifest.json'
+import { fetchCatalog } from './catalog'
 import type { InstalledGame, Manifest } from '../shared/types'
 import { promises as fsp } from 'node:fs'
 import { loadInstallRecords, removeInstallRecord, saveInstallRecord } from './installs'
@@ -62,12 +62,19 @@ app.whenReady().then(() => {
   })
 
   coreBridge.init(corePath)
+
+  let cachedCatalog: Manifest | null = null
+
   ipcMain.handle('forge:request', (_event, message) => coreBridge.request(message))
-  ipcMain.handle('forge:catalog', () => manifest as Manifest)
+  ipcMain.handle('forge:catalog', async () => {
+    const catalog = await fetchCatalog()
+    cachedCatalog = catalog
+    return catalog
+  })
   ipcMain.handle('forge:installed_games', () => loadInstallRecords())
 
   ipcMain.handle('forge:install', async (event, gameId: string) => {
-    const game = (manifest as Manifest).games.find((g) => g.id === gameId)
+    const game = cachedCatalog?.games.find((g) => g.id === gameId)
     if (!game) return { ok: false, error: `unknown game id: ${gameId}` } as const
 
     const installDir = join(app.getPath('userData'), 'installs', gameId)

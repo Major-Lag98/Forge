@@ -3,6 +3,8 @@ import { LoginView } from './views/LoginView'
 import { Shell } from './views/Shell'
 import { WelcomeView } from './views/WelcomeView'
 import { GameDetailView } from './views/GameDetailView'
+import { CatalogErrorView } from './views/CatalogErrorView'
+import { CatalogLoadingView } from './views/CatalogLoadingView'
 import type { Game } from '../../shared/types'
 
 export type GameInstallStatus =
@@ -12,9 +14,14 @@ export type GameInstallStatus =
   | { kind: 'uninstalling' }
   | { kind: 'error'; message: string }
 
+type CatalogState =
+  | { kind: 'loading' }
+  | { kind: 'loaded'; games: Game[] }
+  | { kind: 'error'; message: string }
+
 type Session = {
   currentUser: string
-  games: Game[]
+  catalog: CatalogState
   installs: Record<string, GameInstallStatus>
 }
 
@@ -44,7 +51,6 @@ function App(): React.JSX.Element {
       setState((prev) => {
         if (prev.view === 'login') return prev
         const current = prev.session.installs[gameId]
-        // Only apply progress while we're in the installing state for that game.
         if (!current || current.kind !== 'installing') return prev
         return {
           ...prev,
@@ -60,24 +66,55 @@ function App(): React.JSX.Element {
     })
   }, [])
 
-  const signIn = async (currentUser: string): Promise<void> => {
-    const [manifest, installed] = await Promise.all([
-      window.api.catalog(),
-      window.api.installedGames()
-    ])
+  const refreshCatalog = async (): Promise<void> => {
+    setState((prev) => {
+      if (prev.view === 'login') return prev
+      return {
+        ...prev,
+        session: { ...prev.session, catalog: { kind: 'loading' } }
+      }
+    })
 
-    const installs: Record<string, GameInstallStatus> = {}
-    for (const game of manifest.games) {
-      installs[game.id] = { kind: 'idle' }
+    try {
+      const manifest = await window.api.catalog()
+      setState((prev) => {
+        if (prev.view === 'login') return prev
+        const installs = { ...prev.session.installs }
+        for (const game of manifest.games) {
+          if (!installs[game.id]) installs[game.id] = { kind: 'idle' }
+        }
+        return {
+          ...prev,
+          session: {
+            ...prev.session,
+            catalog: { kind: 'loaded', games: manifest.games },
+            installs
+          }
+        }
+      })
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e)
+      setState((prev) => {
+        if (prev.view === 'login') return prev
+        return {
+          ...prev,
+          session: { ...prev.session, catalog: { kind: 'error', message } }
+        }
+      })
     }
+  }
+
+  const signIn = async (currentUser: string): Promise<void> => {
+    const installed = await window.api.installedGames()
+    const installs: Record<string, GameInstallStatus> = {}
     for (const record of installed) {
       installs[record.id] = { kind: 'installed', executable_path: record.executable_path }
     }
-
     setState({
       view: 'welcome',
-      session: { currentUser, games: manifest.games, installs }
+      session: { currentUser, catalog: { kind: 'loading' }, installs }
     })
+    void refreshCatalog()
   }
 
   const signOut = (): void => setState({ view: 'login' })
@@ -123,7 +160,6 @@ function App(): React.JSX.Element {
     if (!current || current.kind !== 'installed') return
     const executable_path = current.executable_path
 
-    // Clear any previous launch error while we're trying.
     updateInstallStatus(gameId, { kind: 'installed', executable_path })
 
     const result = await window.api.launch(gameId)
@@ -142,10 +178,10 @@ function App(): React.JSX.Element {
     return <LoginView onSignIn={signIn} />
   }
 
+  const catalog = state.session.catalog
+  const games = catalog.kind === 'loaded' ? catalog.games : []
   const selectedGame =
-    state.view === 'gameDetail'
-      ? (state.session.games.find((g) => g.id === state.selectedGameId) ?? null)
-      : null
+    state.view === 'gameDetail' ? (games.find((g) => g.id === state.selectedGameId) ?? null) : null
   const selectedStatus =
     state.view === 'gameDetail'
       ? (state.session.installs[state.selectedGameId] ?? { kind: 'idle' })
@@ -153,14 +189,22 @@ function App(): React.JSX.Element {
 
   return (
     <Shell
-      games={state.session.games}
+      games={games}
       selectedGameId={state.view === 'gameDetail' ? state.selectedGameId : null}
       onSelectGame={selectGame}
       onHome={goHome}
       onSignOut={signOut}
+      onRefreshCatalog={() => void refreshCatalog()}
+      catalogLoading={catalog.kind === 'loading'}
     >
-      {state.view === 'welcome' && <WelcomeView username={state.session.currentUser} />}
-      {selectedGame && selectedStatus && (
+      {catalog.kind === 'loading' && <CatalogLoadingView />}
+      {catalog.kind === 'error' && (
+        <CatalogErrorView message={catalog.message} onRetry={() => void refreshCatalog()} />
+      )}
+      {catalog.kind === 'loaded' && state.view === 'welcome' && (
+        <WelcomeView username={state.session.currentUser} />
+      )}
+      {catalog.kind === 'loaded' && selectedGame && selectedStatus && (
         <GameDetailView
           game={selectedGame}
           status={selectedStatus}
