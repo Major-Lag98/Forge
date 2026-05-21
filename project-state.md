@@ -1,7 +1,7 @@
 # Forge — Project State
 
 **Last updated:** May 20, 2026
-**Status:** 🟡 Phase 2 nearly done — cleanup, tag-triggered release artifact (validated via `v0.1.0-rc4`), remote catalog (separate `Forge-Manifest` repo + manual refresh + hard-fail UI), and the public README all landed. Playwright E2E + the Phase-1 test-gap sweep were de-scoped (see §6). Only demo GIF + architecture SVG remain before cutting v0.1.0.
+**Status:** 🟢 **v0.1.0 shipped.** Tag-triggered release built `forge-0.1.0-setup.exe`, CI all green. Phase 0 → 2 done end-to-end: bootstrap (Electron + C++23 + vcpkg + GoogleTest + Vitest + Windows CI), core flow (login → catalog → download with SHA-256 verify → extract → launch → uninstall), polish + ship (cleanup sweep, packaged NSIS installer bundling `forge_core.exe` + vcpkg DLLs, remote catalog fetched from a separate `Forge-Manifest` repo, README, architecture SVG). Only loose end: a demo GIF at `docs/demo.gif` that the README already references — user will record on their own time. Playwright E2E + the Phase-1 test-gap sweep were de-scoped (see §6).
 
 ---
 
