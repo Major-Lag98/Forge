@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <style>
+    .box { fill: #ffffff; stroke: #333333; stroke-width: 1.5; rx: 10; ry: 10; }
+    .box-emph { fill: #f5f5f5; }
+    .label-strong { fill: #111111; font-size: 16px; font-weight: 600; }
+    .label-sub { fill: #555555; font-size: 12px; }
+    .label-edge { fill: #444444; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .edge { stroke: #444444; stroke-width: 1.5; fill: none; }
+    .arrow { fill: #444444; }
+    .legend { fill: #777777; font-size: 11px; }
+    @media (prefers-color-scheme: dark) {
+      .box { fill: #1c1c1c; stroke: #888888; }
+      .box-emph { fill: #262626; }
+      .label-strong { fill: #f0f0f0; }
+      .label-sub { fill: #b0b0b0; }
+      .label-edge { fill: #cccccc; }
+      .edge { stroke: #aaaaaa; }
+      .arrow { fill: #aaaaaa; }
+      .legend { fill: #888888; }
+    }
+  </style>
+
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow" />
+    </marker>
+    <marker id="arrowhead-start" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M10,0 L0,5 L10,10 z" class="arrow" />
+    </marker>
+  </defs>
+
+  <!-- Renderer -->
+  <rect class="box" x="40" y="40" width="240" height="100" />
+  <text x="160" y="78" text-anchor="middle" class="label-strong">Forge Renderer</text>
+  <text x="160" y="100" text-anchor="middle" class="label-sub">React 19 + TypeScript</text>
+  <text x="160" y="118" text-anchor="middle" class="label-sub">login • catalog rail • install state</text>
+
+  <!-- Main -->
+  <rect class="box" x="380" y="40" width="240" height="100" />
+  <text x="500" y="78" text-anchor="middle" class="label-strong">Forge Main</text>
+  <text x="500" y="100" text-anchor="middle" class="label-sub">Electron main process</text>
+  <text x="500" y="118" text-anchor="middle" class="label-sub">IPC routing • catalog fetch • installs.json</text>
+
+  <!-- Renderer ↔ Main arrow (bidirectional via two markers) -->
+  <line class="edge" x1="280" y1="90" x2="380" y2="90" marker-end="url(#arrowhead)" marker-start="url(#arrowhead-start)" />
+  <text x="330" y="80" text-anchor="middle" class="label-edge">IPC</text>
+
+  <!-- Main → Core vertical arrow -->
+  <line class="edge" x1="500" y1="140" x2="500" y2="240" marker-end="url(#arrowhead)" />
+  <text x="510" y="195" class="label-edge">child_process</text>
+  <text x="510" y="212" class="label-edge">JSON over stdio</text>
+
+  <!-- Core -->
+  <rect class="box box-emph" x="340" y="240" width="320" height="140" />
+  <text x="500" y="278" text-anchor="middle" class="label-strong">Forge Core</text>
+  <text x="500" y="300" text-anchor="middle" class="label-sub">C++23 sidecar binary</text>
+  <text x="500" y="324" text-anchor="middle" class="label-sub">HTTPS download (cpr / libcurl)</text>
+  <text x="500" y="342" text-anchor="middle" class="label-sub">SHA-256 verify (picosha2)</text>
+  <text x="500" y="360" text-anchor="middle" class="label-sub">ZIP extract (libzip)  •  launch (CreateProcessW)</text>
+
+  <!-- Catalog -->
+  <rect class="box" x="720" y="40" width="140" height="60" />
+  <text x="790" y="68" text-anchor="middle" class="label-strong">Catalog</text>
+  <text x="790" y="86" text-anchor="middle" class="label-sub">Forge-Manifest</text>
+
+  <!-- Game zips -->
+  <rect class="box" x="720" y="120" width="140" height="60" />
+  <text x="790" y="148" text-anchor="middle" class="label-strong">Game zips</text>
+  <text x="790" y="166" text-anchor="middle" class="label-sub">GitHub Releases</text>
+
+  <!-- Main → Catalog (HTTPS GET manifest.json) -->
+  <path class="edge" d="M 620 70 L 720 70" marker-end="url(#arrowhead)" />
+  <text x="670" y="60" text-anchor="middle" class="label-edge">HTTPS</text>
+
+  <!-- Core → Game zips (HTTPS download) -->
+  <path class="edge" d="M 660 280 C 700 280, 720 200, 720 180" marker-end="url(#arrowhead)" />
+  <text x="720" y="250" text-anchor="end" class="label-edge">HTTPS</text>
+
+  <!-- Footer legend -->
+  <text x="40" y="420" class="legend">Arrows = data flow.  Renderer never talks to the network or filesystem directly — Main and Core do all the I/O.</text>
+</svg>

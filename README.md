@@ -50,23 +50,11 @@ Games install into `%APPDATA%\Forge\installs\<game-id>\` and persist across laun
 
 ## Architecture
 
-```
-┌─────────────────┐    ┌──────────────┐
-│  Forge Renderer │◄──►│  Forge Main  │
-│   (TS/React)    │IPC │  (Electron)  │
-└─────────────────┘    └──────┬───────┘
-                              │ child_process (JSON over stdio)
-                       ┌──────▼─────────┐    ┌────────────────┐
-                       │   Forge Core   │◄──►│    Catalog     │
-                       │     (C++)      │HTTPS  (Forge-       │
-                       │ download/hash/ │    │   Manifest)    │
-                       │ extract/spawn  │    └────────────────┘
-                       └────────────────┘
-```
+![Architecture diagram](docs/architecture.svg)
 
 The renderer never talks to the network or the filesystem directly. The main process fetches the catalog over HTTPS at startup (and on refresh), forwards install/launch/uninstall requests to the C++ core over the IPC bridge, and persists install records to `%APPDATA%\Forge\installs.json`. The C++ core has no opinion about UI; it could be driven by anything that speaks the JSON protocol.
 
-A fuller diagram is the goal of the next polish item — for now [project-state.md §5](./project-state.md#5-architecture-current-plan) is the canonical view.
+See [project-state.md §5](./project-state.md#5-architecture-current-plan) for the wider design history.
 
 ---
 

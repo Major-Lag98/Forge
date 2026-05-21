@@ -62,6 +62,8 @@ Scoping is half the battle on a side project. Out of scope:
 
 ## 5. Architecture (current plan)
 
+![Architecture diagram](./docs/architecture.svg)
+
 ```
 ┌─────────────────┐    ┌──────────────┐
 │  Forge Renderer │◄──►│ Forge Main   │
@@ -69,12 +71,14 @@ Scoping is half the battle on a side project. Out of scope:
 └─────────────────┘    └──────┬───────┘
                               │ child_process (JSON over stdio)
                        ┌──────▼─────────┐    ┌────────────────┐
-                       │   Forge Core   │◄──►│ Static catalog │
-                       │     (C++)      │HTTP│   + game zips  │
-                       │ download/hash/ │    │  (public URL)  │
+                       │   Forge Core   │◄──►│ Catalog (Forge-│
+                       │     (C++)      │HTTPS  Manifest) +  │
+                       │ download/hash/ │    │   game zips    │
                        │ extract/spawn  │    └────────────────┘
                        └────────────────┘
 ```
+
+(ASCII kept alongside the SVG for terminal-only viewers + grep.)
 
 See [`design/README.md`](./design/README.md) for the visual design — hand sketches of each screen plus locked decisions on layout, colour palette, component patterns, and persistence.
 
@@ -106,7 +110,8 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] Cleanup sweep: dropped the `stubs/` sub-project (artifacts on the GitHub `stubs-1.0.0` release left alone), de-brittled `manifest.test.ts`, rewrote §9 of this doc to point at the live catalog, neutralised dangling `mindustry`/`forge-stub-success` test fixtures, switched the local default CMake preset to VS 2022 to match the installed toolchain
 - [x] CI publishes a release artifact on tagged commits (`.github/workflows/release.yml` triggers on `v*` tags, builds the C++ core via the new `ninja-release` preset, runs gtest + vitest, packages an NSIS installer via `npm run build:win`, uploads to GitHub Releases. `scripts/stage-core.mjs` copies `forge_core.exe` + its vcpkg runtime DLLs to `staging/`, `electron-builder.yml` bundles them via `extraResources`, `src/main/index.ts` resolves `corePath` from `process.resourcesPath` when `app.isPackaged`, and `core-bridge.ts` spawns with `windowsHide: true` so the console-subsystem child doesn't pop a CMD window in the packaged app. Validated end-to-end via `v0.1.0-rc3`.)
 - [x] Remote catalog: manifest is fetched from a separate `Forge-Manifest` GitHub repo at startup; manual refresh button on the catalog rail; hard-fail UI (loading / error-with-retry) when the network is unreachable. `src/main/catalog.ts` does the fetch + JSON schema validation, `App.tsx` owns the `CatalogState` machine, `FORGE_CATALOG_URL` env var overrides the default URL for offline dev. Bundled `src/main/manifest.json` retired in the same commit. (Promoted from stretch.)
-- [ ] Demo GIF, architecture diagram (a real SVG, not ASCII)
+- [x] Architecture diagram (real SVG, not ASCII): [`docs/architecture.svg`](./docs/architecture.svg). Embedded in the README + alongside the ASCII version in §5 of this doc; uses `prefers-color-scheme` media queries inside the SVG so it renders correctly on GitHub in both light and dark modes.
+- [ ] Demo GIF: ~15s recording of login → catalog load → click game → install → play, saved to `docs/demo.gif`. README already references this path.
 - [x] README finalized (full standalone build instructions, subtle tech-stack table, SmartScreen note explaining why the installer is unsigned, links into project-state.md for the deeper history. Demo GIF reference is a placeholder until the demo-GIF task lands.)
 
 **De-scoped late in Phase 2:** the Playwright E2E test and the "fill in any test gaps surfaced during Phase 1" sweep were both cut as the project entered wrap-up. Rationale: the existing GoogleTest harness (21 cases covering download / hash / extract / launch / install orchestrator) plus Vitest integration tests that spawn the real `forge_core.exe` over the IPC bridge already exercise the full stack from the renderer's `window.api` boundary down to the C++ binary. A Playwright run on top of that would mostly retest the same paths through a more brittle harness. The "automation testing" qualification is carried by the CI workflow itself + the IPC-spawning integration tests, not by a Selenium-family tool.
