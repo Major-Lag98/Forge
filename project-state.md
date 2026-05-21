@@ -1,7 +1,7 @@
 # Forge — Project State
 
 **Last updated:** May 20, 2026
-**Status:** 🟡 Phase 2 in progress — cleanup, tag-triggered release artifact (validated via `v0.1.0-rc4`), remote catalog (separate `Forge-Manifest` repo + manual refresh + hard-fail UI), and a real README all done. Remaining: Playwright E2E, demo GIF + architecture SVG, and any test-gap sweep before cutting v0.1.0.
+**Status:** 🟡 Phase 2 nearly done — cleanup, tag-triggered release artifact (validated via `v0.1.0-rc4`), remote catalog (separate `Forge-Manifest` repo + manual refresh + hard-fail UI), and the public README all landed. Playwright E2E + the Phase-1 test-gap sweep were de-scoped (see §6). Only demo GIF + architecture SVG remain before cutting v0.1.0.
 
 ---
 
@@ -104,12 +104,12 @@ Three short phases. Goal is a working demo, not a flagship project.
 
 ### Phase 2 — Polish & ship (≈1 week)
 - [x] Cleanup sweep: dropped the `stubs/` sub-project (artifacts on the GitHub `stubs-1.0.0` release left alone), de-brittled `manifest.test.ts`, rewrote §9 of this doc to point at the live catalog, neutralised dangling `mindustry`/`forge-stub-success` test fixtures, switched the local default CMake preset to VS 2022 to match the installed toolchain
-- [ ] One Playwright E2E test: launch app, install game, verify it runs
-- [ ] Fill in any test gaps surfaced during Phase 1
 - [x] CI publishes a release artifact on tagged commits (`.github/workflows/release.yml` triggers on `v*` tags, builds the C++ core via the new `ninja-release` preset, runs gtest + vitest, packages an NSIS installer via `npm run build:win`, uploads to GitHub Releases. `scripts/stage-core.mjs` copies `forge_core.exe` + its vcpkg runtime DLLs to `staging/`, `electron-builder.yml` bundles them via `extraResources`, `src/main/index.ts` resolves `corePath` from `process.resourcesPath` when `app.isPackaged`, and `core-bridge.ts` spawns with `windowsHide: true` so the console-subsystem child doesn't pop a CMD window in the packaged app. Validated end-to-end via `v0.1.0-rc3`.)
 - [x] Remote catalog: manifest is fetched from a separate `Forge-Manifest` GitHub repo at startup; manual refresh button on the catalog rail; hard-fail UI (loading / error-with-retry) when the network is unreachable. `src/main/catalog.ts` does the fetch + JSON schema validation, `App.tsx` owns the `CatalogState` machine, `FORGE_CATALOG_URL` env var overrides the default URL for offline dev. Bundled `src/main/manifest.json` retired in the same commit. (Promoted from stretch.)
 - [ ] Demo GIF, architecture diagram (a real SVG, not ASCII)
 - [x] README finalized (full standalone build instructions, subtle tech-stack table, SmartScreen note explaining why the installer is unsigned, links into project-state.md for the deeper history. Demo GIF reference is a placeholder until the demo-GIF task lands.)
+
+**De-scoped late in Phase 2:** the Playwright E2E test and the "fill in any test gaps surfaced during Phase 1" sweep were both cut as the project entered wrap-up. Rationale: the existing GoogleTest harness (21 cases covering download / hash / extract / launch / install orchestrator) plus Vitest integration tests that spawn the real `forge_core.exe` over the IPC bridge already exercise the full stack from the renderer's `window.api` boundary down to the C++ binary. A Playwright run on top of that would mostly retest the same paths through a more brittle harness. The "automation testing" qualification is carried by the CI workflow itself + the IPC-spawning integration tests, not by a Selenium-family tool.
 
 ### Stretch (only if there's time and interest)
 - Second platform target.
