@@ -1,7 +1,7 @@
 # Forge — Project State
 
 **Last updated:** May 20, 2026
-**Status:** 🟡 Phase 2 in progress — cleanup sweep + release artifact on tag (forge_core.exe + DLLs bundled into the NSIS installer, validated via `v0.1.0-rc3`) done. Remote catalog landed (manifest now fetched from a separate `Forge-Manifest` repo at startup, with manual refresh button + hard-fail UI). Remaining: Playwright E2E, demo GIF + architecture SVG, README finalize.
+**Status:** 🟡 Phase 2 in progress — cleanup, tag-triggered release artifact (validated via `v0.1.0-rc4`), remote catalog (separate `Forge-Manifest` repo + manual refresh + hard-fail UI), and a real README all done. Remaining: Playwright E2E, demo GIF + architecture SVG, and any test-gap sweep before cutting v0.1.0.
 
 ---
 
@@ -109,7 +109,7 @@ Three short phases. Goal is a working demo, not a flagship project.
 - [x] CI publishes a release artifact on tagged commits (`.github/workflows/release.yml` triggers on `v*` tags, builds the C++ core via the new `ninja-release` preset, runs gtest + vitest, packages an NSIS installer via `npm run build:win`, uploads to GitHub Releases. `scripts/stage-core.mjs` copies `forge_core.exe` + its vcpkg runtime DLLs to `staging/`, `electron-builder.yml` bundles them via `extraResources`, `src/main/index.ts` resolves `corePath` from `process.resourcesPath` when `app.isPackaged`, and `core-bridge.ts` spawns with `windowsHide: true` so the console-subsystem child doesn't pop a CMD window in the packaged app. Validated end-to-end via `v0.1.0-rc3`.)
 - [x] Remote catalog: manifest is fetched from a separate `Forge-Manifest` GitHub repo at startup; manual refresh button on the catalog rail; hard-fail UI (loading / error-with-retry) when the network is unreachable. `src/main/catalog.ts` does the fetch + JSON schema validation, `App.tsx` owns the `CatalogState` machine, `FORGE_CATALOG_URL` env var overrides the default URL for offline dev. Bundled `src/main/manifest.json` retired in the same commit. (Promoted from stretch.)
 - [ ] Demo GIF, architecture diagram (a real SVG, not ASCII)
-- [ ] README finalized
+- [x] README finalized (full standalone build instructions, subtle tech-stack table, SmartScreen note explaining why the installer is unsigned, links into project-state.md for the deeper history. Demo GIF reference is a placeholder until the demo-GIF task lands.)
 
 ### Stretch (only if there's time and interest)
 - Second platform target.
