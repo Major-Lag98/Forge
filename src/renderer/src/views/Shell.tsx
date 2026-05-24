@@ -48,7 +48,7 @@ export function Shell({
               aria-label={game.name}
               title={game.name}
             >
-              {idx + 1}
+              {game.icon_url ? <img src={game.icon_url} alt="" /> : idx + 1}
             </button>
           ))}
         </div>

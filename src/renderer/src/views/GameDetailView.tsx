@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Game } from '../../../shared/types'
 import type { GameInstallStatus } from '../App'
+
+const SCREENSHOT_ROTATE_MS = 7000
 
 interface GameDetailViewProps {
   game: Game
@@ -10,6 +12,12 @@ interface GameDetailViewProps {
   onUninstall: () => void
 }
 
+type BgState = {
+  index: number
+  layer: 'A' | 'B'
+  images: { A: string | null; B: string | null }
+}
+
 export function GameDetailView({
   game,
   status,
@@ -17,29 +25,73 @@ export function GameDetailView({
   onLaunch,
   onUninstall
 }: GameDetailViewProps): React.JSX.Element {
+  // Parent keys this component on game.id, so within a mount `game` is stable
+  // and screenshots never changes — initial state and interval each run once.
+  const screenshots = useMemo(() => game.screenshots ?? [], [game.screenshots])
+  const hasScreenshots = screenshots.length > 0
+
+  const [bg, setBg] = useState<BgState>(() => ({
+    index: 0,
+    layer: 'A',
+    images: { A: screenshots[0] ?? null, B: null }
+  }))
+
+  useEffect(() => {
+    if (screenshots.length <= 1) return
+    const interval = setInterval(() => {
+      setBg((prev) => {
+        const nextIndex = (prev.index + 1) % screenshots.length
+        const nextLayer = prev.layer === 'A' ? 'B' : 'A'
+        return {
+          index: nextIndex,
+          layer: nextLayer,
+          images: { ...prev.images, [nextLayer]: screenshots[nextIndex] }
+        }
+      })
+    }, SCREENSHOT_ROTATE_MS)
+    return () => clearInterval(interval)
+  }, [screenshots])
+
   return (
-    <div className="game-detail">
-      <h1 className="game-title">{game.name}</h1>
-      <ActionButton status={status} onInstall={onInstall} onLaunch={onLaunch} />
-      <UninstallButton
-        key={`${game.id}:${status.kind}`}
-        status={status}
-        onUninstall={onUninstall}
-      />
-      {(() => {
-        const error =
-          status.kind === 'error'
-            ? status.message
-            : status.kind === 'installed'
-              ? status.last_launch_error
-              : undefined
-        return error ? (
-          <p className="game-error" role="alert">
-            {error}
-          </p>
-        ) : null
-      })()}
-      <p className="game-description">{game.description}</p>
+    <div className="game-detail-container">
+      {hasScreenshots && (
+        <>
+          <div
+            className={`game-bg-layer${bg.layer === 'A' ? ' game-bg-layer-active' : ''}`}
+            style={{ backgroundImage: bg.images.A ? `url("${bg.images.A}")` : undefined }}
+            aria-hidden
+          />
+          <div
+            className={`game-bg-layer${bg.layer === 'B' ? ' game-bg-layer-active' : ''}`}
+            style={{ backgroundImage: bg.images.B ? `url("${bg.images.B}")` : undefined }}
+            aria-hidden
+          />
+          <div className="game-bg-overlay" aria-hidden />
+        </>
+      )}
+      <div className="game-detail">
+        <h1 className="game-title">{game.name}</h1>
+        <ActionButton status={status} onInstall={onInstall} onLaunch={onLaunch} />
+        <UninstallButton
+          key={`${game.id}:${status.kind}`}
+          status={status}
+          onUninstall={onUninstall}
+        />
+        {(() => {
+          const error =
+            status.kind === 'error'
+              ? status.message
+              : status.kind === 'installed'
+                ? status.last_launch_error
+                : undefined
+          return error ? (
+            <p className="game-error" role="alert">
+              {error}
+            </p>
+          ) : null
+        })()}
+        <p className="game-description">{game.description}</p>
+      </div>
     </div>
   )
 }

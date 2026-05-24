@@ -108,6 +108,39 @@ describe('fetchCatalog', () => {
     await expect(fetchCatalog('https://example.com/manifest.json')).rejects.toThrow(/executable/)
   })
 
+  it('round-trips optional icon_url and screenshots fields', async () => {
+    const withImages = {
+      schema_version: 1,
+      games: [
+        {
+          ...validManifest.games[0],
+          icon_url: 'https://example.com/icon.webp',
+          screenshots: ['https://example.com/s1.webp', 'https://example.com/s2.webp']
+        }
+      ]
+    }
+    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      mockResponse({ ok: true, body: withImages })
+    )
+    const manifest = await fetchCatalog('https://example.com/manifest.json')
+    expect(manifest.games[0].icon_url).toBe('https://example.com/icon.webp')
+    expect(manifest.games[0].screenshots).toEqual([
+      'https://example.com/s1.webp',
+      'https://example.com/s2.webp'
+    ])
+  })
+
+  it('rejects a game whose screenshots field is not an array', async () => {
+    const bad = {
+      schema_version: 1,
+      games: [{ ...validManifest.games[0], screenshots: 'not-an-array' }]
+    }
+    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      mockResponse({ ok: true, body: bad })
+    )
+    await expect(fetchCatalog('https://example.com/manifest.json')).rejects.toThrow(/screenshots/)
+  })
+
   it('rejects a game whose sha256 is not 64 hex characters', async () => {
     const bad = {
       schema_version: 1,

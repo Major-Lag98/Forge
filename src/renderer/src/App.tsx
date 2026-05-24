@@ -206,6 +206,7 @@ function App(): React.JSX.Element {
       )}
       {catalog.kind === 'loaded' && selectedGame && selectedStatus && (
         <GameDetailView
+          key={selectedGame.id}
           game={selectedGame}
           status={selectedStatus}
           onInstall={() => installGame(selectedGame.id)}

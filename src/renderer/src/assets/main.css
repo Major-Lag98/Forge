@@ -304,9 +304,56 @@
   background: var(--btn-bg-hover);
 }
 
+.rail-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
 /* ──────────────────────────────── Game detail ────────────────────────── */
 
+/* Container escapes the .main-pane 48px padding so the screenshot background
+   reaches the pane edges, then re-applies the padding internally. */
+.game-detail-container {
+  position: relative;
+  margin: -48px;
+  padding: 48px;
+  width: calc(100% + 96px);
+  min-height: calc(100% + 96px);
+}
+
+.game-bg-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 500ms ease-in-out;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.game-bg-layer-active {
+  opacity: 1;
+}
+
+.game-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.5) 60%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 .game-detail {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 24px;

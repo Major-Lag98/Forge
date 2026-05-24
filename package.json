@@ -1,6 +1,6 @@
 {
   "name": "forge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Desktop game launcher: Electron UI over a C++ core that downloads, verifies, extracts, and launches games.",
   "main": "./out/main/index.js",
   "author": "",

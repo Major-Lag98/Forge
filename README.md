@@ -96,7 +96,7 @@ npm run dev
 npm run build:win
 ```
 
-Produces `dist/forge-0.1.0-setup.exe`. Local installer builds require Windows Developer Mode enabled (Settings → Privacy & security → For developers) so electron-builder can extract the `winCodeSign` cache. Tagged commits build the installer in CI without this requirement; see [`.github/workflows/release.yml`](./.github/workflows/release.yml).
+Produces `dist/forge-0.1.1-setup.exe`. Local installer builds require Windows Developer Mode enabled (Settings → Privacy & security → For developers) so electron-builder can extract the `winCodeSign` cache. Tagged commits build the installer in CI without this requirement; see [`.github/workflows/release.yml`](./.github/workflows/release.yml).
 
 ### Tests
 

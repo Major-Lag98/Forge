@@ -86,6 +86,24 @@ function validateGame(value: unknown, idx: number): void {
   if (!/^[0-9a-f]{64}$/i.test(value.sha256 as string)) {
     throw new CatalogFetchError(`games[${idx}].sha256 is not 64 hex characters`)
   }
+  if (value.icon_url !== undefined) {
+    if (typeof value.icon_url !== 'string' || value.icon_url === '') {
+      throw new CatalogFetchError(`games[${idx}].icon_url present but not a non-empty string`)
+    }
+  }
+  if (value.screenshots !== undefined) {
+    if (!Array.isArray(value.screenshots)) {
+      throw new CatalogFetchError(`games[${idx}].screenshots present but not an array`)
+    }
+    for (const [sIdx, s] of value.screenshots.entries()) {
+      if (typeof s !== 'string' || s === '') {
+        throw new CatalogFetchError(`games[${idx}].screenshots[${sIdx}] is not a non-empty string`)
+      }
+    }
+    if (value.screenshots.length > 5) {
+      value.screenshots = value.screenshots.slice(0, 5)
+    }
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

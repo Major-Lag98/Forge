@@ -8,6 +8,8 @@ export interface Game {
   sha256: string
   size_bytes: number
   executable: string
+  icon_url?: string
+  screenshots?: string[]
 }
 
 export interface Manifest {
